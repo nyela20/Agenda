@@ -3,16 +3,15 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const usersRouter = require('./routes/users');
-var indexRouter = require('./routes/index');
-
-
 var app = express();
 
-const mongoose = require('mongoose');
-require('dotenv').config();
+// local storage
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
 
 // Connexion à MongoDB
+const mongoose = require('mongoose');
+require('dotenv').config();
 mongoose.connect("mongodb://localhost:27017/Agenda", {
 }).then(() => {
   console.log('Connected to MongoDB');
@@ -20,21 +19,28 @@ mongoose.connect("mongodb://localhost:27017/Agenda", {
   console.error('Error connecting to MongoDB:', err.message);
 });
 
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// app.use('/users', usersRouter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// routes
+const usersRouter = require('./routes/users');
+var indexRouter = require('./routes/index');
+const agendaRouter = require('./routes/agenda');
+
+// utiliser les routes ici
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/agenda', agendaRouter);
 
+// pour le css
+app.use(express.static(__dirname + '/public'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,7 +1,6 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt'); // pour le mot de passe hasher
 
-
 const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
 
 // Créer un utilisateur
@@ -41,7 +40,11 @@ exports.loginUser = async (req , res) =>{
     if(!isMatch ){
       return res.status(400).render('login' ,{error: 'Mot de passe incorrect  '});
     }
-    res.redirect('/'); // rediger vers la page accuil 
+    
+    // enregistrer le mail de l utilisateur connecte
+    localStorage.setItem('userEmail', email);
+    
+    res.redirect('/agenda'); // rediger vers la page principale
   }catch(err){
     res.status(500).render('login', { error: err.message });
   }
