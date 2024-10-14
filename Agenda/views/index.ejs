@@ -9,5 +9,14 @@
             <h1><%= title %></h1>
             <p>Welcome to <%= title %></p>
         </div>
+        <div>
+            <form action="/users/login" method="GET">
+                <button type="submit">Se connecter</button>
+            </form>
+
+            <form action="/users/register" methode="GET">
+                <button type="submit">Créer un compte</button>
+            </form>
+        </div>
     </body>
 </html>
