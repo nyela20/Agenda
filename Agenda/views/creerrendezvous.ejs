@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <title><%= title %></title>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <form action="/rendezvous/<%= agendaId %>/creer" method="POST">
+        <label for="nom">Nom du rendez-vous :</label>
+        <input type="text" id="nom" name="nom" required><br><br>
+
+        <label for="description">Description :</label>
+        <input type="text" id="description" name="description"><br><br>
+
+        <label for="dateRendezVous">Date du rendez-vous :</label>
+        <input type="datetime-local" id="dateRendezVous" name="dateRendezVous"><br><br>
+
+        <label for="participants">Participants (séparés par des virgules) :</label>
+        <input type="text" id="participants" name="participants"><br><br>
+
+        <label for="createurEmail">Createur :</label>
+        <input name="createurEmail" value="<%= userEmailConnected %> " style="background-color: lightgrey;" readonly required>
+
+        <button type="submit">Créer le Rendez-vous</button>
+    </form>
+
+    <div>
+        <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
+    </div>
+</body>
+</html>
