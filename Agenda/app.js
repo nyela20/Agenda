@@ -33,11 +33,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 const usersRouter = require('./routes/users');
 var indexRouter = require('./routes/index');
 const agendaRouter = require('./routes/agenda');
+const rendezVousRouter = require('./routes/rendezvous'); 
+
 
 // utiliser les routes ici
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/agenda', agendaRouter);
+app.use('/rendezvous', rendezVousRouter); 
 
 // pour le css
 app.use(express.static(__dirname + '/public'));

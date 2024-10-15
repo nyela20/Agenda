@@ -23,7 +23,7 @@
                     <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
                     <strong>Description :</strong> <%= agenda.description %><br>
                     <strong>Email du créateur :</strong> <%= agenda.createurEmail %><br>
-                    <form action="" method="GET">
+                    <form action="/rendezvous/<%= agenda.id %>" method="GET">
                         <button>Voir</button>
                     </form>
                     <hr>

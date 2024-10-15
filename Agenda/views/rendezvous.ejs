@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= mois + " " + date.getFullYear() %></title>
+    <style>
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* 7 colonnes pour 7 jours */
+            gap: 5px;
+        }
+
+        .day-cell {
+            background-color: #d7d7d7;
+            padding: 10px;
+            min-height: 120px; /* Garde la taille des cartes */
+            border-radius: 8px;
+            position: relative;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1><%= mois + " " + date.getFullYear() %></h1>
+            <div class="view-switch">
+                <form action="/rendezvous/<%=agenda.id%>/creer" method="GET" >
+                <button>Ajouter un rendez-vous</button>
+                </form>
+            </div>
+            <hr>
+        </div>
+
+
+
+        <div class="calendar-grid">
+            <div class="day-label">Lun.</div>
+            <div class="day-label">Mar.</div>
+            <div class="day-label">Mer.</div>
+            <div class="day-label">Jeu.</div>
+            <div class="day-label">Ven.</div>
+            <div class="day-label">Sam.</div>
+            <div class="day-label">Dim.</div>
+
+            <% 
+                // les cellules (invisibles) avant le premier jour du mois
+                for (let i = 0; i < startingCell; i++) { 
+                    %><div style="visibility: hidden" class="day-cell"></div><%
+                }
+
+                // les cellules (visibles) avec les jours du mois
+                for (let day = 1; day <= nombreTotalDeJourMois; day++) {
+                    %><div class="day-cell"><%= day %></div><%
+                }
+            %>
+        </div>
+    </div>
+</body>
+</html>
