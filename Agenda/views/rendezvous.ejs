@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= mois + " " + date.getFullYear() %></title>
+    <div>
+        <%= agenda %>
+    </div>
     <style>
         .calendar-grid {
             display: grid;
@@ -12,18 +15,21 @@
         }
 
         .day-cell {
-            background-color: #d7d7d7;
+            background-color: #c5ffd2;
             padding: 10px;
             min-height: 40px;
-            border-radius: 8px;
             position: relative;
-            box-shadow: 0px 20px 0px #d7d7d7;
+            box-shadow: 0px 20px 0px #c5ffd2;
         }
 
         .nav-buttons {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
+        }
+
+        .rendez-vous-cell{
+            background-color: aquamarine;
         }
 
     </style>
@@ -33,6 +39,8 @@
     <div class="calendar-container">
         <div class="calendar-header">
             <h1><%= mois + " " + date.getFullYear() %></h1>
+            <h2>Nom : <%= agenda.nom %> </h2>
+            <h3>Description : <%= agenda.description %> </h3>
             <div class="view-switch">
                 <form action="/rendezvous/<%= agenda.id %>/creer" method="GET">
                     <button>Ajouter un rendez-vous</button>
@@ -98,7 +106,7 @@
             <div class="day-label">Sam.</div>
             <div class="day-label">Dim.</div>
 
-            <!-- Les horaires de 01h à 24h -->
+            <!-- Les horaires de 00h à 23h -->
             <% 
                 for (let hour = 0; hour < 24; hour++) { 
             %>
@@ -109,8 +117,35 @@
                         const jour = premierJourAffichage + i;
                 %>  
 
-                        <% if (jour >= 0 && jour <= nombreJours) { %>
-                            <div class="day-cell"> </div> 
+                        <% if (jour >= 0 && jour < nombreJours) { %>
+                            <div class="day-cell"> <%= (hour == 0) ? jour + 1 : "" %> 
+                                <% 
+                                // Parcours la liste des rendez-vous et affiche leurs attributs
+                                rendezVousList.forEach(rendezvous => { 
+                                    %>
+                                                                                
+                                            <%    
+                                                if(jour + 1 == rendezvous.dateRendezVous.getDate()){
+                                                    if(hour == rendezvous.dateRendezVous.getHours()){ %>
+                                                        <div class="rendez-vous-cell">
+                                                        <%="Nom :" +  rendezvous.nom%>
+                                                        <br>
+                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h:" + rendezvous.dateRendezVous.getMinutes() + "min";%>
+                                                    </div>
+                                                    <%}
+                                                }
+                                                /*
+                                                rendezvous.dateRendezVous.getFullYear() + " " +
+                                                rendezvous.dateRendezVous.getMonth() + " " + 
+                                                rendezvous.dateRendezVous.getDate() + " " + 
+                                                rendezvous.dateRendezVous.getHours() + " " +
+                                                rendezvous.dateRendezVous.getMinutes()
+                                                */   
+                                            %>  
+                                    <% 
+                                    }); 
+                                %>
+                            </div> 
                         <% } else { %>
                             <div class="day-cell" style="visibility: hidden;"></div>
                         <% } %>

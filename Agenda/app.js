@@ -43,7 +43,6 @@ app.use('/agenda', agendaRouter);
 app.use('/rendezvous', rendezVousRouter); 
 
 // pour le css
-app.use(express.static(__dirname + '/public'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
