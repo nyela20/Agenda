@@ -59,3 +59,9 @@ exports.getUsers = async (req, res) => {
     res.status(500).send(err);
   }
 };
+// Déconnexion d'un utilisateur
+exports.logoutUser = async (req, res) => {
+  //Vide de localStorage sans vérifier l'email
+  localStorage.clear(); 
+  res.redirect('/');
+};
