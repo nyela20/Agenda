@@ -10,7 +10,7 @@ router.get('/', userController.getUsers);
 
 // route pour afficher le formulaire de creation compte
 router.get('/register' , (req ,res) =>{
-    res.render('register');
+    res.render('register' , { error: null });
 });
 
 //route pour afficher le formulaire de connexion
