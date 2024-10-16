@@ -15,7 +15,7 @@ router.get('/register' , (req ,res) =>{
 
 //route pour afficher le formulaire de connexion
 router.get('/login' , (req , res)=>{
-    res.render('login');
+    res.render('login', { error: null });
 });
 
 // Route pour traiter la connexion
