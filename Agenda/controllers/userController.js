@@ -7,7 +7,11 @@ const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
 // Créer un utilisateur
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password , confirmPassword } = req.body;
+
+    if(password !== confirmPassword){
+      return res.status(400).render('register', { error: 'Les mots de passe ne correspondent pas.' });
+    }
     
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
