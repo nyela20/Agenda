@@ -41,25 +41,43 @@ exports.creerRendezVous = async (req, res) => {
 exports.afficherRendezVous = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
-
-    // Récupérer l'agenda
     const agenda = await Agenda.findById(agendaId);
 
-    //TODO recuperer les rendez vous des agendas pour les afficher 
-
     if (!agenda) {
-        return res.status(401).send('Agenda non trouvé : ' + agendaId + ' et req.params : ' + JSON.stringify(req.params));
+      return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
 
-    // les parametres du mois courant
-    const date = new Date();
-    const mois = new Intl.DateTimeFormat('fr-FR',{ month: 'long' }).format(date);
-    const nombreTotalDeJourMois = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(); // nombre total de jours dans le mois
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay(); // premier jour du mois (0 = dimanche, 1 = lundi, mardi = 2, ...)
-    const startingCell = (firstDay === 0) ? 6 : firstDay - 1; // ajuster pour le calendrier (dimanche = 6)
-   
-    res.render('rendezVous', { agenda, date , mois, nombreTotalDeJourMois, startingCell}); // Render the view with the agenda and its rendez-vous
+    // la date et l'heure a afficher
+    let moisParametre =  parseInt(req.query.moisParametre, 10);
+    if(isNaN(moisParametre)){ 
+      moisParametre = 9; // octobre par default 
+    }
+    let anneeParametre = parseInt(req.query.anneeParametre, 10);
+    if(isNaN(anneeParametre)){ 
+      anneeParametre = 2024; // par default
+    }
+
+    const date = new Date(anneeParametre, moisParametre, 1);
+
+    // le mois courant en français en utilisant le nom long du mois
+    const mois = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+
+    // le nombre total de jours dans le mois courant
+    const nombreJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+    // le jour de la semaine du premier jour du mois courant (dimanche = 0, lundi = 1, mardi = 2, ... )
+    const premierJour = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
+    // le nombre de cellule vides avant le premier jour à afficher dans le calendrier
+    //si le premier jour est dimanche (0), on commence à 6 pour décaler correctement
+    const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
+
+    // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
+    const semaine = parseInt(req.query.semaine, 10) || 1;
+
+    res.render('rendezVous', { agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre });
+
   } catch (error) {
-    res.status(500).send('Erreur lors de la récupération des rendez-vous');
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message);
   }
 };
