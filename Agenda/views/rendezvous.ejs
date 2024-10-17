@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= mois + " " + date.getFullYear() %></title>
-    <div>
-        <%= agenda %>
-    </div>
     <style>
         .calendar-grid {
             display: grid;
@@ -42,7 +39,7 @@
             <h2>Nom : <%= agenda.nom %> </h2>
             <h3>Description : <%= agenda.description %> </h3>
             <div class="view-switch">
-                <form action="/rendezvous/<%= agenda.id %>/creer" method="GET">
+                <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
                     <button>Ajouter un rendez-vous</button>
                 </form>
             </div>
@@ -131,6 +128,10 @@
                                                         <%="Nom :" +  rendezvous.nom%>
                                                         <br>
                                                         <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h:" + rendezvous.dateRendezVous.getMinutes() + "min";%>
+                                                        <% const rdv = JSON.stringify(rendezvous)%>
+                                                        <form action="/rendezvous/<%=agenda.id%>/informations/<%=rdv%>" method ="GET">                                                            
+                                                            <button type = "submit">Informations</button>
+                                                        </form>
                                                     </div>
                                                     <%}
                                                 }
