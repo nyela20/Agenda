@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <title><%= title %></title>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rdv%>" method="POST">
+        <% const RDV = JSON.parse(rdv)%>
+        <label for="nom">Nom du rendez-vous : <%=RDV.nom%></label>
+        <br>
+        <label for="description">Description :<%=RDV.description%></label>
+        <br>
+        <label for="dateRendezVous">Date du rendez-vous :<%=RDV.dateRendezVous%></label>
+        <br>
+        <label for="participants">Participants:<%=RDV.participants%></label>
+        <br>
+        <label for="createurEmail">Createur :<%=RDV.createurEmail%></label>
+        <br>
+        <div>
+            <button>Supprimer le Rendez-Vous</button>
+        </div>
+    </form>
+    
+    <a href="/rendezvous/<%=agendaId%>"><button>Modifier le Rendez-Vous</button></a>
+
+    <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
+
+</body>
+</html>
