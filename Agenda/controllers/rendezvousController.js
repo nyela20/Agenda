@@ -4,7 +4,7 @@ const Agenda = require('../models/agenda.js');
 // Fonction pour créer un rendez-vous et le sauvegarder dans la base de données
 exports.creerRendezVous = async (req, res) => {
   try {
-    const { nom, description, dateRendezVous, participants, createurEmail } = req.body;
+    const { nom, description, dateRendezVous, participants, createurEmail, dureeHeures, dureeMinutes } = req.body;
     
     const agenda = await Agenda.findById(req.params.agendaId);
 
@@ -15,7 +15,11 @@ exports.creerRendezVous = async (req, res) => {
       dateRendezVous,
       participants,
       createurEmail,
-      agenda: agenda 
+      agenda: agenda ,
+      duree: {
+        heures: dureeHeures,
+        minutes: dureeMinutes
+      }
     });
 
     // sauvegarde
@@ -36,6 +40,8 @@ exports.creerRendezVous = async (req, res) => {
     });
   }
 };
+
+
 
 // Fonction pour afficher les rendez-vous d'un agenda
 exports.afficherRendezVous = async (req, res) => {
@@ -86,16 +92,34 @@ exports.afficherRendezVous = async (req, res) => {
 //supprimer un rendez vous
 exports.supprimerRendezVous = async (req, res) => {
   try{
-    
-    const temp = JSON.parse(req.params.rdvId);
-    console.log(temp);
-
-    const rendezvoussupprimer = await RendezVous.findByIdAndDelete(temp._id);
-    
-    res.redirect('/agenda');
+  
+    await RendezVous.findByIdAndDelete(req.params.rendezvousId);
+  
+    res.redirect('/rendezvous/' + req.params.agendaId);
 
   } catch (error) {
     res.status(501).send('Erreur lors de la supression du rendez-vous : ' +  error.message);
   }
 
+};
+
+// Fonction pour obtenir un rendez-vous par ID
+exports.getRendezVousById = async (req) => {
+  try {
+    const rendezVousId = req.params.rendezvousId;
+
+    // Rechercher le rendez-vous par son ID
+    const rendezVous = await RendezVous.findById(rendezVousId);
+
+    // Vérifier si le rendez-vous existe
+    if (!rendezVous) {
+      return { error: 'Rendez-vous non trouvé' };  // Renvoie l'erreur
+    }
+
+    // Renvoie le rendez-vous trouvé
+    return rendezVous;
+  } catch (error) {
+    console.error(error);
+    return { error: 'Erreur serveur, veuillez réessayer plus tard.' };  // Renvoie l'erreur
+  }
 };

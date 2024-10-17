@@ -3,33 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheets/styleAgenda.css">
     <title><%= mois + " " + date.getFullYear() %></title>
-    <style>
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
-        }
-
-        .day-cell {
-            background-color: #c5ffd2;
-            padding: 10px;
-            min-height: 40px;
-            position: relative;
-            box-shadow: 0px 20px 0px #c5ffd2;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .rendez-vous-cell{
-            background-color: aquamarine;
-        }
-
-    </style>
 </head>
 <body>
 
@@ -124,24 +99,14 @@
                                             <%    
                                                 if(jour + 1 == rendezvous.dateRendezVous.getDate()){
                                                     if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                        <div class="rendez-vous-cell">
+                                                        <div style="cursor: pointer;" class="rendez-vous-cell" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
                                                         <%="Nom :" +  rendezvous.nom%>
                                                         <br>
                                                         <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h:" + rendezvous.dateRendezVous.getMinutes() + "min";%>
-                                                        <% const rdv = JSON.stringify(rendezvous)%>
-                                                        <form action="/rendezvous/<%=agenda.id%>/informations/<%=rdv%>" method ="GET">                                                            
-                                                            <button type = "submit">Informations</button>
-                                                        </form>
                                                     </div>
                                                     <%}
                                                 }
-                                                /*
-                                                rendezvous.dateRendezVous.getFullYear() + " " +
-                                                rendezvous.dateRendezVous.getMonth() + " " + 
-                                                rendezvous.dateRendezVous.getDate() + " " + 
-                                                rendezvous.dateRendezVous.getHours() + " " +
-                                                rendezvous.dateRendezVous.getMinutes()
-                                                */   
+                                                
                                             %>  
                                     <% 
                                     }); 

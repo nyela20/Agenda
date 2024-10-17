@@ -32,6 +32,16 @@ const rendezVousSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Agenda',  // référence à l'agenda
     required: true
+  },
+  duree: {
+    heures: {
+      type: Number,  // nombre d'heures
+      required: true
+    },
+    minutes: {
+      type: Number,  // nombre de minutes
+      required: true
+    }
   }
 });
 
