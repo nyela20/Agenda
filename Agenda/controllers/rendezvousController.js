@@ -51,7 +51,7 @@ exports.afficherRendezVous = async (req, res) => {
     // la date et l'heure a afficher
     let moisParametre =  parseInt(req.query.moisParametre, 10);
     if(isNaN(moisParametre)){ 
-      moisParametre = 9; // octobre par default 
+      moisParametre = 9; // octobre par defaut
     }
     let anneeParametre = parseInt(req.query.anneeParametre, 10);
     if(isNaN(anneeParametre)){ 
@@ -81,4 +81,21 @@ exports.afficherRendezVous = async (req, res) => {
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message);
   }
+};
+
+//supprimer un rendez vous
+exports.supprimerRendezVous = async (req, res) => {
+  try{
+    
+    const temp = JSON.parse(req.params.rdvId);
+    console.log(temp);
+
+    const rendezvoussupprimer = await RendezVous.findByIdAndDelete(temp._id);
+    
+    res.redirect('/agenda');
+
+  } catch (error) {
+    res.status(501).send('Erreur lors de la supression du rendez-vous : ' +  error.message);
+  }
+
 };
