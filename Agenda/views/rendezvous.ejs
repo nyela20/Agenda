@@ -11,9 +11,13 @@
     <div class="calendar-container">
         <div class="calendar-header">
             <h1><%= mois + " " + date.getFullYear() %></h1>
-            <h2>Nom : <%= agenda.nom %> </h2>
-            <h3>Description : <%= agenda.description %> </h3>
+            <h3>Nom : <%= agenda.nom %> </h3>
+            <h4>Description : <%= agenda.description %> </h4>
+            <h4>Créateur de cet agenda : <%= agenda.createurEmail %> </h4>
             <div class="view-switch">
+                <form action="/agenda" method ="GET">
+                    <button>Page Principale</button>
+                </form>
                 <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
                     <button>Ajouter un rendez-vous</button>
                 </form>
@@ -99,10 +103,12 @@
                                             <%    
                                                 if(jour + 1 == rendezvous.dateRendezVous.getDate()){
                                                     if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                        <div style="cursor: pointer;" class="rendez-vous-cell" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                        <div style="cursor: pointer;" class="rendez-vous-cell<%=rendezvous.couleur%>" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
                                                         <%="Nom :" +  rendezvous.nom%>
                                                         <br>
-                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h:" + rendezvous.dateRendezVous.getMinutes() + "min";%>
+                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
+                                                        <br>
+                                                        <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
                                                     </div>
                                                     <%}
                                                 }

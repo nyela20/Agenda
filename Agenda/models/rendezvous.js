@@ -42,6 +42,10 @@ const rendezVousSchema = new mongoose.Schema({
       type: Number,  // nombre de minutes
       required: true
     }
+  },
+  couleur :{
+    type : Number,
+    required : true
   }
 });
 

@@ -7,7 +7,7 @@ router.get('/', agendaController.afficherAgendas);
 
 // afficher le formulaire agenda
 router.get('/creer' , function(req ,res){
-    res.render('creerAgenda', { title : 'Creation agenda', userEmailConnected : localStorage.getItem("userEmail")});
+    res.render('creeragenda', { title : 'Creation agenda', userEmailConnected : localStorage.getItem("userEmail")});
 });
 
 // creation agenda

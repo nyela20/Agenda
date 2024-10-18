@@ -14,26 +14,38 @@
         <label for="description">Description :</label>
         <input type="text" id="description" name="description"><br><br>
 
+        <label for="couleur">Choisissez une couleur :</label>
+        <select id="couleur" name="couleur" required>
+            <option value="">Sélectionnez une couleur</option>
+            <option value="0">Rouge</option>
+            <option value="1">Bleu</option>
+            <option value="2">Vert</option>
+            <option value="3">Jaune</option>
+            <option value="4">Noir</option>
+            <option value="5">Blanc</option>
+            <option value="6">Violet</option>
+            <option value="7">Orange</option>
+        </select>
+        <br><br>
+
         <label for="dateRendezVous">Date du rendez-vous :</label>
         <input type="datetime-local" id="dateRendezVous" name="dateRendezVous"><br><br>
 
         <label for="dureeHeures">Durée (heures) :</label>
-        <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="1" required><br><br>
+        <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="1" required>
 
-        <label for="dureeMinutes">Durée (minutes) :</label>
+        <label for="dureeMinutes">(minutes) :</label>
         <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" max="59" value="0" required><br><br>
-
-        <!--<label for="participants">Participants (séparés par des virgules) :</label>
-        <input type="text" id="participants" name="participants"><br><br>-->
-
-        <label for="createurEmail">Createur :</label>
-        <input name="createurEmail" value="<%= userEmailConnected %> " style="background-color: lightgrey;" readonly required>
+        
+        <label style="visibility: hidden;" for="createurEmail">Createur :</label>
+        <input name="createurEmail" value="<%= userEmailConnected %> " style="visibility: hidden;" readonly required> <br>
 
         <button type="submit">Créer le Rendez-vous</button>
     </form>
-
+    <br>
     <div>
         <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
     </div>
+
 </body>
 </html>
