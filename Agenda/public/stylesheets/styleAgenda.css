@@ -1,0 +1,38 @@
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+}
+
+.day-cell {
+    background-color: #c5ffd2;
+    padding: 10px;
+    min-height: 40px;
+    position: relative;
+    box-shadow: 0px 20px 0px #c5ffd2;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* Style de base pour toutes les classes rendez-vous-cell */
+[class^="rendez-vous-cell"] {
+    border: 1px solid;
+    padding: 10px;
+    text-align: center;
+}
+  
+/* Couleurs spécifiques */
+.rendez-vous-cell0 { background-color: hsl(0, 74%, 72%); color: #333; border-color: #ccc; }
+.rendez-vous-cell1 { background-color: #e0f7fa; color: #00796b; border-color: #00796b; }
+.rendez-vous-cell2 { background-color: hsl(120, 74%, 71%); color: #1d3d09; border-color: #034213; }
+.rendez-vous-cell3 { background-color: #fcfa7c; color: #717900; border-color: #635900; }
+.rendez-vous-cell4 { background-color: #242424; color: #d1d1d1; border-color: #302e36; }
+.rendez-vous-cell5 { background-color: #ebebeb; color: #000000; border-color: #a3a3a3; }
+.rendez-vous-cell6 { background-color: #e468f5; color: #221e1a; border-color: #32005a; }
+.rendez-vous-cell7 { background-color: #ffa631; color: #040b14; border-color: #c07615; }
+  
