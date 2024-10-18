@@ -4,7 +4,7 @@ const Agenda = require('../models/agenda.js');
 // Fonction pour créer un rendez-vous et le sauvegarder dans la base de données
 exports.creerRendezVous = async (req, res) => {
   try {
-    const { nom, description, dateRendezVous, participants, createurEmail, dureeHeures, dureeMinutes } = req.body;
+    const { nom, couleur, description, dateRendezVous, participants, createurEmail, dureeHeures, dureeMinutes } = req.body;
     
     const agenda = await Agenda.findById(req.params.agendaId);
 
@@ -19,7 +19,8 @@ exports.creerRendezVous = async (req, res) => {
       duree: {
         heures: dureeHeures,
         minutes: dureeMinutes
-      }
+      },
+      couleur
     });
 
     // sauvegarde
@@ -121,5 +122,43 @@ exports.getRendezVousById = async (req) => {
   } catch (error) {
     console.error(error);
     return { error: 'Erreur serveur, veuillez réessayer plus tard.' };  // Renvoie l'erreur
+  }
+};
+
+// fonction pour modifier un rendez-vous
+exports.modifierRendezVous = async (req, res) => {
+  try {
+    const { nom, couleur, description, dateRendezVous, participants, createurEmail, dureeHeures, dureeMinutes } = req.body;
+
+    // construction dynamique des champs à mettre à jour
+    const champsModifies = {
+      ...(nom && { nom }),
+      ...(couleur && { couleur }),
+      ...(description && { description }),
+      ...(dateRendezVous && { dateRendezVous }),
+      ...(participants && { participants }),
+      ...(createurEmail && { createurEmail }),
+      ...(dureeHeures || dureeMinutes) && { 
+        duree: {
+          heures: dureeHeures || 0,
+          minutes: dureeMinutes || 0
+        }
+      }
+    };
+
+    // Mettre à jour le rendez-vous
+    const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
+      req.params.rendezvousId,
+      { $set: champsModifies },
+      { new: true }
+    );
+
+    if (!rendezVousMisAJour) {
+      return res.status(404).json({ message: 'Rendez-vous non trouvé' });
+    }
+
+    res.redirect('/rendezvous/' + req.params.agendaId);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
   }
 };
