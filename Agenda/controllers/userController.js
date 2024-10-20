@@ -9,10 +9,20 @@ exports.createUser = async (req, res) => {
   try {
     const { name, email, password , confirmPassword } = req.body;
 
+    // validation mail 
+    const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).render('register', { error: 'Adresse email invalide.' });
+    }
+
+    // validation password
+    if(password.length < 6){
+      return res.status(400).render('register', { error: 'Le mot de passe doit contenir au moins 6 caractères.' });
+    }
+
     if(password !== confirmPassword){
       return res.status(400).render('register', { error: 'Les mots de passe ne correspondent pas.' });
     }
-    
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
