@@ -15,6 +15,10 @@ exports.createUser = async (req, res) => {
       return res.status(400).render('register', { error: 'Adresse email invalide.' });
     }
 
+    if(name.length < 4 ){
+      return res.status(400).render('register', { error: 'le nom doit contenir au moins 4 caractères.' });
+    }
+
     // validation password
     if(password.length < 6){
       return res.status(400).render('register', { error: 'Le mot de passe doit contenir au moins 6 caractères.' });
