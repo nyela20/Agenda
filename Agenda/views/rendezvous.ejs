@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheets/styleAgenda.css">
+    <title><%= mois + " " + date.getFullYear() %></title>
+</head>
+<body>
+
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1><%= mois + " " + date.getFullYear() %></h1>
+            <h3>Nom : <%= agenda.nom %> </h3>
+            <h4>Description : <%= agenda.description %> </h4>
+            <h4>Créateur de cet agenda : <%= agenda.createurEmail %> </h4>
+            <div class="view-switch">
+                <form action="/agenda" method ="GET">
+                    <button>Page Principale</button>
+                </form>
+                <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
+                    <button>Ajouter un rendez-vous</button>
+                </form>
+            </div>
+            <hr>
+        </div>
+
+        <!-- Navigation des semaines/mois/annee -->
+        <div class="nav-buttons">
+            <% 
+                let semainePrecedente;
+                let moisPrecedent = moisParametre;
+                let anneePrecedent = anneeParametre;
+                if (semaine > 1) {
+                    semainePrecedente = semaine - 1;
+                } else {
+                    semainePrecedente = 5;
+                    moisPrecedent = moisParametre - 1;
+                    if (moisPrecedent < 0) {
+                        moisPrecedent = 11;
+                        anneePrecedent = anneeParametre - 1;
+                    }
+                }
+            %>
+            <form method="GET" action="/rendezvous/<%= agenda.id %>">
+                <input type="hidden" name="semaine" value="<%= semainePrecedente %>" />
+                <input type="hidden" name="moisParametre" value="<%= moisPrecedent %>" />
+                <input type="hidden" name="anneeParametre" value="<%= anneePrecedent %>" />
+                <button type="submit">Semaine Précédente</button>
+            </form>
+
+            <%
+                let semaineSuivante;
+                let moisSuivant = moisParametre;
+                let anneeSuivant = anneeParametre;
+                if (semaine < 5) {
+                    semaineSuivante = semaine + 1;
+                } else {
+                    semaineSuivante = 1;
+                    moisSuivant = moisParametre + 1;
+                    if (moisSuivant > 11) {
+                        moisSuivant = 0; 
+                        anneeSuivant = anneeParametre + 1;
+                    }
+                }
+            %>
+            <form method="GET" action="/rendezvous/<%= agenda.id %>">
+                <input type="hidden" name="semaine" value="<%= semaineSuivante %>" />
+                <input type="hidden" name="moisParametre" value="<%= moisSuivant %>" />
+                <input type="hidden" name="anneeParametre" value="<%= anneeSuivant %>" />
+                <button type="submit">Semaine Suivante</button>
+            </form>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="day-label">Horaires</div>
+            <div class="day-label">Lun.</div>
+            <div class="day-label">Mar.</div>
+            <div class="day-label">Mer.</div>
+            <div class="day-label">Jeu.</div>
+            <div class="day-label">Ven.</div>
+            <div class="day-label">Sam.</div>
+            <div class="day-label">Dim.</div>
+
+            <!-- Les horaires de 00h à 23h -->
+            <% 
+                for (let hour = 0; hour < 24; hour++) { 
+            %>
+                <div class="day-label"><%= (hour) + "h" %></div>
+                <% 
+                    const premierJourAffichage = (semaine - 1) * 7 - caseDepart;
+                    for (let i = 0; i < 7; i++) {
+                        const jour = premierJourAffichage + i;
+                %>  
+
+                        <% if (jour >= 0 && jour < nombreJours) { %>
+                            <div class="day-cell"> <%= (hour == 0) ? jour + 1 : "" %> 
+                                <% 
+                                // Parcours la liste des rendez-vous et affiche leurs attributs
+                                rendezVousList.forEach(rendezvous => { 
+                                    %>
+                                                                                
+                                            <%    
+                                                if(jour + 1 == rendezvous.dateRendezVous.getDate()){
+                                                    if(hour == rendezvous.dateRendezVous.getHours()){ %>
+                                                        <div style="cursor: pointer;" class="rendez-vous-cell<%=rendezvous.couleur%>" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                        <%="Nom :" +  rendezvous.nom%>
+                                                        <br>
+                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
+                                                        <br>
+                                                        <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
+                                                    </div>
+                                                    <%}
+                                                }
+                                                
+                                            %>  
+                                    <% 
+                                    }); 
+                                %>
+                            </div> 
+                        <% } else { %>
+                            <div class="day-cell" style="visibility: hidden;"></div>
+                        <% } %>
+                <% 
+                    } 
+                %>
+            <% 
+                } 
+            %>
+        </div>
+    </div>
+</body>
+</html>

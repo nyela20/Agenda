@@ -1,7 +1,6 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt'); // pour le mot de passe hasher
 
-
 const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
 
 // Créer un utilisateur
@@ -27,6 +26,7 @@ exports.createUser = async (req, res) => {
     if(password !== confirmPassword){
       return res.status(400).render('register', { error: 'Les mots de passe ne correspondent pas.' });
     }
+
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     
@@ -59,7 +59,11 @@ exports.loginUser = async (req , res) =>{
     if(!isMatch ){
       return res.status(400).render('login' ,{error: 'Mot de passe incorrect  '});
     }
-    res.redirect('/'); // rediger vers la page accuil 
+    
+    // enregistrer le mail de l utilisateur connecte
+    localStorage.setItem('userEmail', email);
+    
+    res.redirect('/agenda'); // rediger vers la page principale
   }catch(err){
     res.status(500).render('login', { error: err.message });
   }
@@ -73,4 +77,10 @@ exports.getUsers = async (req, res) => {
   } catch (err) {
     res.status(500).send(err);
   }
+};
+// Déconnexion d'un utilisateur
+exports.logoutUser = async (req, res) => {
+  //Vide de localStorage sans vérifier l'email
+  localStorage.clear(); 
+  res.redirect('/');
 };

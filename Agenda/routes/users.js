@@ -20,6 +20,7 @@ router.get('/login' , (req , res)=>{
 
 // Route pour traiter la connexion
 router.post('/login', userController.loginUser);
-
+// Route de déconnexion
+router.get('/logout', userController.logoutUser);
 
 module.exports = router;

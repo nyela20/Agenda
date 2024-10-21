@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <title>Page Principale</title>
+</head>
+<body>
+    <h1>Page Principale</h1>
+    <h2>Votre session : <%= userEmailConnected %></h2>
+
+    <div>
+        <form action="/agenda/creer" method="GET">
+            <button type="submit">Ajouter un agenda</button>
+        </form>
+    </div>
+
+    <h2>Liste des Agendas</h2>
+    <% if (agendas.length > 0) { %>
+        <ul>
+            <% agendas.forEach(agenda => { %>
+                <li>
+                    <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
+                    <strong>Description :</strong> <%= agenda.description %><br>
+                    <strong>Email du créateur :</strong> <%= agenda.createurEmail %><br>
+                    <form action="/rendezvous/<%= agenda.id %>" method="GET">
+                        <button>Voir</button>
+                    </form>
+                    <hr>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <p>Aucun agenda trouvé.</p>
+    <% } %>
+    <form id="logoutForm" action="/users/logout" method="GET">
+        <button type="submit" id="logoutBtn">Déconnexion</button>
+    </form>
+
+</body>
+</html>
