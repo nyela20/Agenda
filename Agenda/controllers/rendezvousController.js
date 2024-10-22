@@ -59,7 +59,7 @@ exports.afficherRendezVous = async (req, res) => {
     }
 
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
-    let agendaIds = []
+    let agendaIds = [agendaId]
     agendas.forEach(agenda => {
       if(req.query[agenda.nom]){
         agendaIds.push(agenda.id)
