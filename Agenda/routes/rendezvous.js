@@ -18,7 +18,11 @@ router.get('/:agendaId/informations/:rendezvousId', async function(req, res, nex
     const dateRendezVous = new Date(rendezvous.dateRendezVous);
     dateRendezVous.setHours(dateRendezVous.getHours() + 2);
     const dateRendezVousFormatted = dateRendezVous.toISOString().slice(0, 16);  // Récupère YYYY-MM-DDTHH:MM
-    res.render('rendezvousinfos', { title: 'Informations sur le Rendez-vous', rendezvous, dateRendezVousFormatted,  agendaId, userEmailConnected: localStorage.getItem("userEmail") });
+    res.render('rendezvousinfos', 
+        { title: 'Informations sur le Rendez-vous', 
+            rendezvous, dateRendezVousFormatted,  
+            agendaId, 
+            userEmailConnected: localStorage.getItem("userEmail") });
 });
 
 // suppression d'un rendez-vous

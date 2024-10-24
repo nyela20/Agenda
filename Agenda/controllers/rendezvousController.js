@@ -55,15 +55,22 @@ exports.afficherRendezVous = async (req, res) => {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
 
+    //date de systeme actuelle
+    const dateActuelle = new Date();
+
     // la date et l'heure a afficher
     let moisParametre =  parseInt(req.query.moisParametre, 10);
     if(isNaN(moisParametre)){ 
-      moisParametre = 9; // octobre par defaut
+      // moisParametre = 9; // octobre par defaut
+      moisParametre = dateActuelle.getMonth() ;
     }
     let anneeParametre = parseInt(req.query.anneeParametre, 10);
     if(isNaN(anneeParametre)){ 
-      anneeParametre = 2024; // par default
+      //anneeParametre = 2024; // par default
+      anneeParametre = dateActuelle.getFullYear(); // année actuelle
     }
+
+    let jourActuel = dateActuelle.getDate();
 
     const date = new Date(anneeParametre, moisParametre, 1);
 
@@ -83,7 +90,16 @@ exports.afficherRendezVous = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezVous', { agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList });
+    res.render('rendezvous', { agenda, 
+      date, 
+      mois, 
+      nombreJours, 
+      caseDepart, 
+      semaine, 
+      moisParametre, 
+      anneeParametre, 
+      rendezVousList
+     });
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message);
