@@ -46,6 +46,22 @@ const rendezVousSchema = new mongoose.Schema({
   couleur :{
     type : Number,
     required : true
+  },
+  // champs pour la récurrence , RDV
+  estRecurrent :{
+    type : Boolean,
+    default: false 
+  },
+  typeRecurrence:{
+    type : String,
+    enum: ['aucun' , 'quotidien' , 'semaine' , 'mensuel'],
+    default: 'aucune'
+  },
+  finRecurrence:{
+    type: Date,
+    required : function(){
+      return this.estRecurrent;
+    }
   }
 });
 
