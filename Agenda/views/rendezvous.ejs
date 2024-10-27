@@ -32,22 +32,22 @@
                 <!--<h3><%=//"test " + JSON.stringify(req.query) %></h3> -->
 
                 <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>" >
-                    
+
                     <!-- Ne pas changer la date si on soumet ce formulaire -->
                     <input type="hidden" name="semaine" value="<%= semaine %>" />
                     <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
                     <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
-                    
-                    <% 
+
+                    <%
                     // Parcours la liste des agendas dans la bdd
-                    agendas.forEach(agendaElement => { 
+                    agendas.forEach(agendaElement => {
                         if(!(agendaElement.id == agenda.id)){ %>
                             <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
                             <input type="checkbox" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
                             <% if(req.query[agendaElement.nom]){ %> checked <%} %> >
-                            <br>                   
+                            <br>
                         <%}
-                        }); 
+                        });
                     %>
                     <br>
                     <button type="submit"> Mettre à jour affichage </button>
@@ -144,6 +144,24 @@
                                                         <br>
                                                         <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
                                                     </div>
+                                                        <div style="cursor: pointer;"
+                                                            class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
+                                                            onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                            <%="Nom :" +  rendezvous.nom%>
+                                                            <br>
+                                                            <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
+                                                            <br>
+                                                            <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
+                                                            <!-- rdv Recurrent -->
+                                                            <% if(rendezvous.estRecurrent) { %>
+                                                                <br>
+                                                                <span class="recurrence-info">
+                                                                    <%= rendezvous.typeRecurrence === 'quotidien' ? '(Quotidien)' :
+                                                                        rendezvous.typeRecurrence === 'semaine' ? '(Hebdomadaire)' :
+                                                                        rendezvous.typeRecurrence === 'mensuel' ? '(Mensuel)' : '' %>
+                                                                </span>
+                                                            <% } %>
+                                                        </div>
                                                     <%}
                                                 }
                                                 

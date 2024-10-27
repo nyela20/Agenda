@@ -40,12 +40,60 @@
         <label style="visibility: hidden;" for="createurEmail">Createur :</label>
         <input name="createurEmail" value="<%= userEmailConnected %> " style="visibility: hidden;" readonly required> <br>
 
+        <!-- Nouveaux champs pour la récurrence -->
+        <div class="form-group">
+            <label for="estRecurrent">Rendez-vous récurrent :</label>
+            <input type="checkbox" id="estRecurrent" name="estRecurrent">
+        </div>
+        
+        <div class="form-group" id="optionsRecurrence">
+            <label for="typeRecurrence">Type de récurrence :</label>
+            <select id="typeRecurrence" name="typeRecurrence">
+                <option value="aucun">Aucun</option>
+                <option value="quotidien">Chaque jour</option>
+                <option value="semaine">Chaque semaine</option>
+                <option value="mensuel">Chaque mois</option>
+            </select>
+        
+            <div class="form-group">
+                <label for="finRecurrence">Date de fin de récurrence :</label>
+                <input type="date" id="finRecurrence" name="finRecurrence">
+            </div>
+        </div>
+
+
+
         <button type="submit">Créer le Rendez-vous</button>
     </form>
     <br>
     <div>
         <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
     </div>
+
+    <script>
+        // Gestion de l'affichage des options de Récurrence
+        document.getElementById('estRecurrent').addEventListener('change', function() {
+            const optionsRecurrence = document.getElementById('optionsRecurrence');
+            const typeRecurrence = document.getElementById('typeRecurrence');
+            const finRecurrence = document.getElementById('finRecurrence');
+            
+            if (this.checked) {
+                optionsRecurrence.style.display = 'block';
+                typeRecurrence.required = true;
+                finRecurrence.required = true;
+            } else {
+                optionsRecurrence.style.display = 'none';
+                typeRecurrence.required = false;
+                finRecurrence.required = false;
+                // Réinitialiser les valeurs
+                typeRecurrence.value = 'aucun';
+                finRecurrence.value = '';
+            }
+        });
+
+        // Cacher initialement les options de récurrence
+        document.getElementById('optionsRecurrence').style.display = 'none';
+    </script>
 
 </body>
 </html>

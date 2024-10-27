@@ -55,7 +55,7 @@ const rendezVousSchema = new mongoose.Schema({
   typeRecurrence:{
     type : String,
     enum: ['aucun' , 'quotidien' , 'semaine' , 'mensuel'],
-    default: 'aucune'
+    default: 'aucun'
   },
   finRecurrence:{
     type: Date,

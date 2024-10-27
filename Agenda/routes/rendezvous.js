@@ -25,6 +25,35 @@ router.get('/:agendaId/informations/:rendezvousId', async function(req, res, nex
             userEmailConnected: localStorage.getItem("userEmail") });
 });
 
+// Nouvelle route pour gérer la récurrence
+// router.get('/:agendaId/recurrents/:rendezvousId', async function(req, res) {
+//     try {
+//         const rendezvous = await rendezVousController.getRendezVousById(req);
+//         if (rendezvous.estRecurrent) {
+//             // Obtenir tous les rendez-vous de la série
+//             const serieRendezVous = await rendezVousController.getSerieRendezVous(rendezvous);
+//             res.json(serieRendezVous);
+//         } else {
+//             res.status(400).json({ message: "Ce rendez-vous n'est pas récurrent" });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
+
+// // création d'un nouveau rendez-vous (mise à jour pour gérer la récurrence)
+// router.post('/:agendaId/creer', async function(req, res, next) {
+//     try {
+//         await rendezVousController.creerRendezVous(req, res, next);
+//     } catch (error) {
+//         console.error('Erreur lors de la création du rendez-vous:', error);
+//         res.status(500).json({ 
+//             message: 'Erreur lors de la création du rendez-vous',
+//             error: error.message 
+//         });
+//     }
+// });
+
 // suppression d'un rendez-vous
 router.post('/:agendaId/supprimer/:rendezvousId', async function(req, res, next) {
     await rendezVousController.supprimerRendezVous(req, res, next);
