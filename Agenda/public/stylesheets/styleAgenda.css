@@ -5,6 +5,10 @@
     gap: 5px;
 }
 
+.view-switch {
+    display: inline-flex;
+}
+
 .day-cell {
     background-color: #c5ffd2;
     padding: 10px;

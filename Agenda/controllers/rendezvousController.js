@@ -42,15 +42,18 @@ exports.creerRendezVous = async (req, res) => {
   }
 };
 
-
-
 // Fonction pour afficher les rendez-vous d'un agenda
 exports.afficherRendezVous = async (req, res) => {
   try {
-    const agendaId = req.params.agendaId;
-    const agenda = await Agenda.findById(agendaId);
-    const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
 
+    // recuperer l id de l'agenda a afficher
+    const agendaId = req.params.agendaId;
+
+    // recuperer tout les agendas de la bdd
+    const agendas = await Agenda.find();
+
+    // recuperer l agenda a afficher
+    const agenda = await Agenda.findById(agendaId);
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
@@ -58,7 +61,16 @@ exports.afficherRendezVous = async (req, res) => {
     //date de systeme actuelle
     const dateActuelle = new Date();
 
-    // la date et l'heure a afficher
+    // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
+    let agendaIds = [agendaId]
+    agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
+    const rendezVousList = await RendezVous.find({ agenda: { $in : agendaIds }});  // les rendez-vous de cet agenda
+    
+    // la date a afficher
     let moisParametre =  parseInt(req.query.moisParametre, 10);
     if(isNaN(moisParametre)){ 
       // moisParametre = 9; // octobre par defaut
@@ -84,25 +96,16 @@ exports.afficherRendezVous = async (req, res) => {
     const premierJour = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
     // le nombre de cellule vides avant le premier jour à afficher dans le calendrier
-    //si le premier jour est dimanche (0), on commence à 6 pour décaler correctement
+    // si le premier jour est dimanche (0), on commence à 6 pour décaler correctement
     const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
 
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezvous', { agenda, 
-      date, 
-      mois, 
-      nombreJours, 
-      caseDepart, 
-      semaine, 
-      moisParametre, 
-      anneeParametre, 
-      rendezVousList
-     });
+    res.render('rendezVous', { req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas });
 
   } catch (error) {
-    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message);
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
   }
 };
 
