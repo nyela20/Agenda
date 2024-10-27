@@ -133,39 +133,27 @@
                                 rendezVousList.forEach(rendezvous => { 
                                     %>
                                                                                 
-                                            <%    
-                                                if(jour + 1 == rendezvous.dateRendezVous.getDate()){
-                                                    if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                        <div style="cursor: pointer;" class="rendez-vous-cell<%=rendezvous.couleur%>" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                        <% if(jour + 1 == rendezvous.dateRendezVous.getDate()){
+                                            if(hour == rendezvous.dateRendezVous.getHours()){ %>
+                                                <div style="cursor: pointer;"
+                                                    class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
+                                                    onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                    <%="Nom :" +  rendezvous.nom%>
+                                                    <br>
+                                                    <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
+                                                    <br>
+                                                    <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
+                                                    <% if(rendezvous.estRecurrent) { %>
                                                         <br>
-                                                        <%="Nom :" +  rendezvous.nom%>
-                                                        <br>
-                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
-                                                        <br>
-                                                        <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
-                                                    </div>
-                                                        <div style="cursor: pointer;"
-                                                            class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
-                                                            onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
-                                                            <%="Nom :" +  rendezvous.nom%>
-                                                            <br>
-                                                            <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
-                                                            <br>
-                                                            <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
-                                                            <!-- rdv Recurrent -->
-                                                            <% if(rendezvous.estRecurrent) { %>
-                                                                <br>
-                                                                <span class="recurrence-info">
-                                                                    <%= rendezvous.typeRecurrence === 'quotidien' ? '(Quotidien)' :
-                                                                        rendezvous.typeRecurrence === 'semaine' ? '(Hebdomadaire)' :
-                                                                        rendezvous.typeRecurrence === 'mensuel' ? '(Mensuel)' : '' %>
-                                                                </span>
-                                                            <% } %>
-                                                        </div>
-                                                    <%}
-                                                }
-                                                
-                                            %>  
+                                                        <span class="recurrence-info">
+                                                            <%= rendezvous.typeRecurrence === 'quotidien' ? '(Quotidien)' :
+                                                                rendezvous.typeRecurrence === 'semaine' ? '(Hebdomadaire)' :
+                                                                rendezvous.typeRecurrence === 'mensuel' ? '(Mensuel)' : '' %>
+                                                        </span>
+                                                    <% } %>
+                                                </div>
+                                            <%}
+                                        }%> 
                                     <% 
                                     }); 
                                 %>

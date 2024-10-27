@@ -125,6 +125,8 @@ exports.afficherRendezVous = async (req, res) => {
     const agenda = await Agenda.findById(agendaId);
     //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
 
+    const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
+
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
@@ -219,7 +221,7 @@ exports.afficherRendezVous = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezVous', { req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas });
+    res.render('rendezvous', { req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas });
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
