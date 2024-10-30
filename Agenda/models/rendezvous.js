@@ -5,7 +5,8 @@ const rendezVousSchema = new mongoose.Schema({
   nom: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    unique : true
   },
   description: {
     type: String,
