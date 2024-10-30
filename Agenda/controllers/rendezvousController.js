@@ -123,6 +123,8 @@ exports.afficherRendezVous = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
+    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
+
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
@@ -324,8 +326,7 @@ exports.modifierRendezVous = async (req, res) => {
       );
     } else {
       // Mettre à jour le rendez-vous
-      const rendezVousMisAJour =
-      await RendezVous.findByIdAndUpdate(
+      const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
         req.params.rendezvousId,
         { $set: champsModifies },
         { new: true }
@@ -339,8 +340,7 @@ exports.modifierRendezVous = async (req, res) => {
 
     res.redirect('/rendezvous/' + req.params.agendaId);
   } catch (error) {
-    res.status(500).json({
-      message: 'Erreur lors de la modification du rendez-vous',
-      error: error.message });
+    res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
   }
 };
+
