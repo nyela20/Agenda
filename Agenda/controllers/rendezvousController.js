@@ -123,13 +123,19 @@ exports.afficherRendezVous = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
-    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
-
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
+
+    // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
+    let agendaIds = [agendaId]
+    agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
 
     //date de systeme actuelle
     const dateActuelle = new Date();
@@ -154,7 +160,7 @@ exports.afficherRendezVous = async (req, res) => {
 
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
-      agenda : agendaId,
+      agenda : {$in : agendaIds},
       $or: [
         // rdvs non récurrents
         {
@@ -273,52 +279,44 @@ exports.modifierRendezVous = async (req, res) => {
           modifierTousLesRecurrents
         } = req.body;
 
-    // const rendezVous = await RendezVous.findById(req.params.rendezVousId);
-    const rendezVous = await RendezVous.findById(req.params.rendezvousId);
-    if (!rendezVous) {
-      return res.status(404).json({ message: 'Rendez-vous non trouvé' });
-    }
+    const rendezVous = await RendezVous.findById(req.params.rendezVousId);
 
-    // construction dynamique des champs à mettre à jour
-    const champsModifies = {
-      ...(nom && { nom }),
-      ...(couleur && { couleur }),
-      ...(description && { description }),
-      ...(dateRendezVous && { dateRendezVous }),
-      ...(participants && { participants }),
-      ...(createurEmail && { createurEmail }),
-      ...(dureeHeures || dureeMinutes) && {
-        duree: {
-          heures: dureeHeures || 0,
-          minutes: dureeMinutes || 0
-        }
-      }
-    };
-
-    if(rendezVous.estRecurrent ){
+    if(rendezVous.estRecurrent && modifierTousLesRecurrents){
       // modifier tous les rdvs recu à partir de la date actuelle
       await RendezVous.updateMany(
         {
-          agenda: rendezVous.agenda,
-          estRecurrent: true,
-          typeRecurrence: rendezVous.typeRecurrence,
-          dateRendezVous: { $gte: rendezVous.dateRendezVous },
-          finRecurrence: rendezVous.finRecurrence
+          agenda : rendezVous.agenda,
+          estRecurrent : true,
+          typeRecurrence : rendezVous.typeRecurrence,
+          dateRendezVous : { $gte: rendezVous.dateRendezVous}
         },
         {
           $set: {
-            nom: champsModifies.nom,
-            couleur: champsModifies.couleur,
-            description: champsModifies.description,
-            participants: champsModifies.participants,
-            duree: champsModifies.duree
+            nom , couleur , description , participants,
+            duree:{ heures : dureeHeures , minutes : dureeHeures}
           }
         }
       );
     } else {
+
+      // construction dynamique des champs à mettre à jour
+      const champsModifies = {
+        ...(nom && { nom }),
+        ...(couleur && { couleur }),
+        ...(description && { description }),
+        ...(dateRendezVous && { dateRendezVous }),
+        ...(participants && { participants }),
+        ...(createurEmail && { createurEmail }),
+        ...(dureeHeures || dureeMinutes) && {
+          duree: {
+            heures: dureeHeures || 0,
+            minutes: dureeMinutes || 0
+          }
+        }
+      };
+
       // Mettre à jour le rendez-vous
-      const rendezVousMisAJour = 
-      await RendezVous.findByIdAndUpdate(
+      const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
         req.params.rendezvousId,
         { $set: champsModifies },
         { new: true }
@@ -332,8 +330,7 @@ exports.modifierRendezVous = async (req, res) => {
 
     res.redirect('/rendezvous/' + req.params.agendaId);
   } catch (error) {
-    res.status(500).json({ 
-      message: 'Erreur lors de la modification du rendez-vous', 
-      error: error.message });
+    res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
   }
 };
+
