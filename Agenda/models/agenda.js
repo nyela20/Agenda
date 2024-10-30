@@ -26,7 +26,11 @@ const agendaSchema = new mongoose.Schema({
   },
   rendezVous: [{
     type: [String]
-  }]
+  }],
+  // champ pour partager un agenda
+  email: {
+    type: String,
+  }
 });
 
 const Agenda = mongoose.model('Agenda', agendaSchema);
