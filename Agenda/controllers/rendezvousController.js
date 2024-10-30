@@ -273,44 +273,52 @@ exports.modifierRendezVous = async (req, res) => {
           modifierTousLesRecurrents
         } = req.body;
 
-    const rendezVous = await RendezVous.findById(req.params.rendezVousId);
+    // const rendezVous = await RendezVous.findById(req.params.rendezVousId);
+    const rendezVous = await RendezVous.findById(req.params.rendezvousId);
+    if (!rendezVous) {
+      return res.status(404).json({ message: 'Rendez-vous non trouvé' });
+    }
 
-    if(rendezVous.estRecurrent && modifierTousLesRecurrents){
+    // construction dynamique des champs à mettre à jour
+    const champsModifies = {
+      ...(nom && { nom }),
+      ...(couleur && { couleur }),
+      ...(description && { description }),
+      ...(dateRendezVous && { dateRendezVous }),
+      ...(participants && { participants }),
+      ...(createurEmail && { createurEmail }),
+      ...(dureeHeures || dureeMinutes) && {
+        duree: {
+          heures: dureeHeures || 0,
+          minutes: dureeMinutes || 0
+        }
+      }
+    };
+
+    if(rendezVous.estRecurrent ){
       // modifier tous les rdvs recu à partir de la date actuelle
       await RendezVous.updateMany(
         {
-          agenda : rendezVous.agenda,
-          estRecurrent : true,
-          typeRecurrence : rendezVous.typeRecurrence,
-          dateRendezVous : { $gte: rendezVous.dateRendezVous}
+          agenda: rendezVous.agenda,
+          estRecurrent: true,
+          typeRecurrence: rendezVous.typeRecurrence,
+          dateRendezVous: { $gte: rendezVous.dateRendezVous },
+          finRecurrence: rendezVous.finRecurrence
         },
         {
           $set: {
-            nom , couleur , description , participants,
-            duree:{ heures : dureeHeures , minutes : dureeHeures}
+            nom: champsModifies.nom,
+            couleur: champsModifies.couleur,
+            description: champsModifies.description,
+            participants: champsModifies.participants,
+            duree: champsModifies.duree
           }
         }
       );
     } else {
-
-      // construction dynamique des champs à mettre à jour
-      const champsModifies = {
-        ...(nom && { nom }),
-        ...(couleur && { couleur }),
-        ...(description && { description }),
-        ...(dateRendezVous && { dateRendezVous }),
-        ...(participants && { participants }),
-        ...(createurEmail && { createurEmail }),
-        ...(dureeHeures || dureeMinutes) && {
-          duree: {
-            heures: dureeHeures || 0,
-            minutes: dureeMinutes || 0
-          }
-        }
-      };
-
       // Mettre à jour le rendez-vous
-      const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
+      const rendezVousMisAJour = 
+      await RendezVous.findByIdAndUpdate(
         req.params.rendezvousId,
         { $set: champsModifies },
         { new: true }
@@ -324,6 +332,8 @@ exports.modifierRendezVous = async (req, res) => {
 
     res.redirect('/rendezvous/' + req.params.agendaId);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
+    res.status(500).json({ 
+      message: 'Erreur lors de la modification du rendez-vous', 
+      error: error.message });
   }
 };

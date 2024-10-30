@@ -46,6 +46,12 @@
             <button>Appliquer les modifications</button>
         </div>
     </form>
+    <!-- <% if (rendezvous.estRecurrent) { %>
+        <div>
+          <input type="checkbox" id="modifierTousLesRecurrents" name="modifierTousLesRecurrents">
+          <label for="modifierTousLesRecurrents">Modifier tous les rendez-vous récurrents suivants</label>
+        </div>
+      <% } %> -->
     
     <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rendezvous.id%>" method="POST">
             <button>Supprimer le Rendez-Vous</button>
