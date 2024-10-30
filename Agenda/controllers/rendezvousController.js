@@ -285,21 +285,7 @@ exports.modifierRendezVous = async (req, res) => {
       return res.status(404).json({ message: 'Rendez-vous non trouvé' });
     }
 
-    // construction dynamique des champs à mettre à jour
-    const champsModifies = {
-      ...(nom && { nom }),
-      ...(couleur && { couleur }),
-      ...(description && { description }),
-      ...(dateRendezVous && { dateRendezVous }),
-      ...(participants && { participants }),
-      ...(createurEmail && { createurEmail }),
-      ...(dureeHeures || dureeMinutes) && {
-        duree: {
-          heures: dureeHeures || 0,
-          minutes: dureeMinutes || 0
-        }
-      }
-    };
+    
       // construction dynamique des champs à mettre à jour
       const champsModifies = {
         ...(nom && { nom }),
