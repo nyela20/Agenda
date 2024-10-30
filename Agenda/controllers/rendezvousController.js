@@ -123,13 +123,19 @@ exports.afficherRendezVous = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
-    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
-
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
+
+    // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
+    let agendaIds = [agendaId]
+    agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
 
     //date de systeme actuelle
     const dateActuelle = new Date();
@@ -154,7 +160,7 @@ exports.afficherRendezVous = async (req, res) => {
 
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
-      agenda : agendaId,
+      agenda : {$in : agendaIds},
       $or: [
         // rdvs non récurrents
         {
