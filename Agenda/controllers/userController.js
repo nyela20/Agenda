@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const RendezVous = require('../models/rendezvous.js'); 
+const Agenda = require('../models/agenda.js'); 
 const bcrypt = require('bcrypt'); // pour le mot de passe hasher
 
 const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
@@ -68,4 +70,37 @@ exports.logoutUser = async (req, res) => {
   //Vide de localStorage sans vérifier l'email
   localStorage.clear(); 
   res.redirect('/');
+};
+
+exports.getUserByMail = async (req, res) => {
+  try {
+    const users = localStorage.getItem("userEmail");
+    const temp = await User.findOne({"email":users});
+    return temp;
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+exports.updateUserByMail = async (req, res) => {
+  try {
+    
+    const{nom , email} = req.body;
+    const oldMail = localStorage.getItem("userEmail");
+    
+    await User.updateOne({"email":oldMail},{$set:{"nom":nom,"email":email}});
+
+
+
+    await RendezVous.updateMany({"createurEmail":oldMail},{$set:{"createurEmail":email}});
+
+    await Agenda.updateMany({"createurEmail":oldMail},{$set:{"createurEmail":email}});
+
+    localStorage.setItem("userEmail",email);
+    res.redirect("/agenda");
+    // res.status(200).send(temp);
+
+  } catch (err) {
+    res.status(500).send(err);
+  }
 };

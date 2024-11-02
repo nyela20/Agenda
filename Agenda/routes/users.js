@@ -23,4 +23,15 @@ router.post('/login', userController.loginUser);
 // Route de déconnexion
 router.get('/logout', userController.logoutUser);
 
+//récupérer les informations du compte et les afficher
+router.get('/compte' , async function(req ,res){
+    userData = await userController.getUserByMail(req,res,localStorage.getItem("userEmail"));
+    res.render('compte', { title : 'Votre Compte',userData});
+});
+
+//mettre à jour le compte
+router.post('/compte' , async function(req ,res){
+    await userController.updateUserByMail(req,res);
+});
+
 module.exports = router;
