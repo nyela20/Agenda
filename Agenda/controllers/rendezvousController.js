@@ -123,6 +123,8 @@ exports.afficherRendezVous = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
+    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
+
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
@@ -279,26 +281,13 @@ exports.modifierRendezVous = async (req, res) => {
           modifierTousLesRecurrents
         } = req.body;
 
-    const rendezVous = await RendezVous.findById(req.params.rendezVousId);
+    // const rendezVous = await RendezVous.findById(req.params.rendezVousId);
+    const rendezVous = await RendezVous.findById(req.params.rendezvousId);
+    if (!rendezVous) {
+      return res.status(404).json({ message: 'Rendez-vous non trouvé' });
+    }
 
-    if(rendezVous.estRecurrent && modifierTousLesRecurrents){
-      // modifier tous les rdvs recu à partir de la date actuelle
-      await RendezVous.updateMany(
-        {
-          agenda : rendezVous.agenda,
-          estRecurrent : true,
-          typeRecurrence : rendezVous.typeRecurrence,
-          dateRendezVous : { $gte: rendezVous.dateRendezVous}
-        },
-        {
-          $set: {
-            nom , couleur , description , participants,
-            duree:{ heures : dureeHeures , minutes : dureeHeures}
-          }
-        }
-      );
-    } else {
-
+    
       // construction dynamique des champs à mettre à jour
       const champsModifies = {
         ...(nom && { nom }),
@@ -315,6 +304,27 @@ exports.modifierRendezVous = async (req, res) => {
         }
       };
 
+    if(rendezVous.estRecurrent ){
+      // modifier tous les rdvs recu à partir de la date actuelle
+      await RendezVous.updateMany(
+        {
+          agenda: rendezVous.agenda,
+          estRecurrent: true,
+          typeRecurrence: rendezVous.typeRecurrence,
+          dateRendezVous: { $gte: rendezVous.dateRendezVous },
+          finRecurrence: rendezVous.finRecurrence
+        },
+        {
+          $set: {
+            nom: champsModifies.nom,
+            couleur: champsModifies.couleur,
+            description: champsModifies.description,
+            participants: champsModifies.participants,
+            duree: champsModifies.duree
+          }
+        }
+      );
+    } else {
       // Mettre à jour le rendez-vous
       const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
         req.params.rendezvousId,
