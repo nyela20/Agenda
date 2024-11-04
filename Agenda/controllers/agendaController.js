@@ -12,7 +12,7 @@ exports.creerAgenda = async (req, res) => {
       rendezVous
     });
     const agendaSauvegarde = await nouvelAgenda.save();
-    // réponse réussie
+    // réponse  réussie
     res.redirect('/agenda'); // rediger vers la page principale
   } catch (error) {
     // réponse erreurs
