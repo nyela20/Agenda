@@ -15,4 +15,8 @@ router.post('/creer' , async function(req ,res, next){
     await agendaController.creerAgenda(req, res, next);
 });
 
+// Routes pour le partage
+router.post('/:agendaId/partager', agendaController.partagerAgenda);
+router.post('/:agendaId/annuler-partage', agendaController.annulerPartage);
+
 module.exports = router;
