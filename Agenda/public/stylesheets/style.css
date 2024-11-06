@@ -51,3 +51,7 @@ button {
 button:hover {
   background-color: #45a049;
 }
+
+.bouton-agenda-action{
+  display: inline-flex;
+}

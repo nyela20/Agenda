@@ -50,10 +50,14 @@
                                 </ul>
                             <% } %>
                         </div>
-
-                        <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                            <button>Voir</button>
-                        </form>
+                        <div>
+                            <form action="/rendezvous/<%= agenda.id %>" method="GET">
+                                <button>Voir</button>
+                            </form>
+                            <form action="/agenda/<%= agenda.id %>/modifier" method="GET">
+                                <button>Modifier</button>
+                            </form>
+                        </div>
                         <hr>
                     </li>
                 <% }) %>
@@ -70,9 +74,11 @@
                         <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
                         <strong>Description :</strong> <%= agenda.description %><br>
                         <strong>Créateur :</strong> <%= agenda.createurEmail %><br>
-                        <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                            <button>Voir</button>
-                        </form>
+                        <div class="bouton-agenda-action">
+                            <form action="/rendezvous/<%= agenda.id %>" method="GET">
+                                <button>Voir</button>
+                            </form>
+                        </div>
                         <hr>
                     </li>
                 <% }) %>

@@ -19,4 +19,15 @@ router.post('/creer' , async function(req ,res, next){
 router.post('/:agendaId/partager', agendaController.partagerAgenda);
 router.post('/:agendaId/annuler-partage', agendaController.annulerPartage);
 
+// route modifier formulaire
+router.get('/:agendaId/modifier' , function(req ,res){
+    const agendaId = req.params.agendaId;
+    res.render('agendainfos', { title : 'Modifier agenda', agendaId , userEmailConnected : localStorage.getItem("userEmail")});
+});
+
+// route appliquer modif
+router.post('/:agendaId/modifier' , async function(req ,res, next){
+    await agendaController.modifierAgenda(req, res, next);
+});
+
 module.exports = router;

@@ -122,3 +122,32 @@ exports.annulerPartage = async (req, res) => {
   }
 };
 
+// modifier un agenda 
+exports.modifierAgenda = async (req, res) => {
+  try {
+
+    const { nom, description } = req.body;
+
+    // recherche de l'agenda s
+    const agenda = await Agenda.findById(req.params.agendaId);
+    if (!agenda) {
+      return res.status(404).json({ message: 'Agenda non trouvé' });
+    }
+
+    // maj des champs nom description
+    const agendaMisAJour = await Agenda.findByIdAndUpdate(
+      req.params.agendaId,
+      { $set: { nom, description } },
+      { new: true }
+    );
+
+    if (!agendaMisAJour) {
+      return res.status(404).json({ message: 'Agenda non trouvé' });
+    }
+
+    // redirection si modification reussie
+    res.redirect('/agenda'); // rediger vers la page principale
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la modification de l\'agenda', error: error.message });
+  }
+};
