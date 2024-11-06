@@ -29,11 +29,96 @@ exports.afficherAgendas = async (req, res) => {
         const userEmailConnected = localStorage.getItem('userEmail');
 
         // récuperer les agendas depuis la bdd
-        const agendas = await Agenda.find({ createurEmail: userEmailConnected }); 
+        const agendasCrees = await Agenda.find({ createurEmail: userEmailConnected }); 
+        // Récupérer les agendas partagés avec l'utilisateur
+        const agendasPartages = await Agenda.find({
+          'partages.email': userEmailConnected
+        });
+        // Combiner les deux listes
+        const agendas = [...agendasCrees, ...agendasPartages];
+
+
         // passer la liste des agendas dans la vue
-        res.render('agenda', { title: 'Liste des Agendas', agendas, userEmailConnected });
+        res.render('agenda', { 
+          title: 'Liste des Agendas', 
+          agendas, 
+          userEmailConnected,
+          agendasCrees,
+          agendasPartages
+        });
     } catch (error) {
         res.status(500).send('Erreur lors de la récupération des agendas' + localStorage.getItem('userEmail'));
     }
+};
+
+
+
+// partager agenda
+exports.partagerAgenda = async(req , res) =>{
+  try{
+
+    const agendaId = req.params.agendaId;
+    const { emailPartage } = req.body;
+    
+    // Vérifier si l'agenda existe
+    const agenda = await Agenda.findById(agendaId);
+    if (!agenda) {
+      return res.status(404).json({ message: 'Agenda non trouvé' });
+    }
+
+    // Vérifier si l'utilisateur est le créateur
+    if (agenda.createurEmail !== req.body.userEmailConnected) {
+      return res.status(403).json({ message: 'Non autorisé à partager cet agenda' });
+    }
+
+    // Vérifier si l'agenda est déjà partagé avec cet utilisateur
+    const partageExistant = agenda.partages.find(p => p.email === emailPartage);
+    if (partageExistant) {
+      return res.status(400).json({ message: 'Agenda déjà partagé avec cet utilisateur' });
+    }
+
+    // Ajouter le partage
+    agenda.partages.push({ email: emailPartage });
+    await agenda.save();
+
+    res.redirect('/agenda');
+
+  }catch(error){
+    res.status(500).json({
+      message: 'Erreur lors du partage de l\'agenda',
+      error: error.message
+    });
+  }
+};
+
+
+// Annuler le partage d'un agenda
+exports.annulerPartage = async (req, res) => {
+  try {
+    const agendaId = req.params.agendaId;
+    const { emailPartage } = req.body;
+    
+    // Vérifier si l'agenda existe
+    const agenda = await Agenda.findById(agendaId);
+    if (!agenda) {
+      return res.status(404).json({ message: 'Agenda non trouvé' });
+    }
+
+    // Vérifier si l'utilisateur est le créateur
+    if (agenda.createurEmail !== req.body.userEmailConnected) {
+      return res.status(403).json({ message: 'Non autorisé à modifier les partages' });
+    }
+
+    // Retirer le partage
+    agenda.partages = agenda.partages.filter(p => p.email !== emailPartage);
+    await agenda.save();
+
+    res.redirect('/agenda');
+  } catch (error) {
+    res.status(500).json({
+      message: 'Erreur lors de l\'annulation du partage',
+      error: error.message
+    });
+  }
 };
 
