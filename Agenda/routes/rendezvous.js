@@ -5,6 +5,9 @@ const rendezVousController = require('../controllers/rendezvousController');
 // afficher les rendez-vous de l'agenda
 router.get('/:agendaId', rendezVousController.afficherRendezVous);
 
+// afficher les rendez-vous de l'agenda
+router.get('/:agendaId/jour', rendezVousController.afficherRendezVousJour);
+
 // afficher formulaire pour creer un rendez-vous
 router.get('/:agendaId/creer', function(req, res) {
     const agendaId = req.params.agendaId; // récupérer l'ID de l'agenda

@@ -3,23 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/stylesheets/styleAgenda.css">
+    <link rel="stylesheet" href="/stylesheets/styleAgendaJournalier.css">
     <title><%= mois + " " + date.getFullYear() %></title>
 </head>
 <body>
 
     <div class="calendar-container">
         <div class="calendar-header">
-            <h1><%= mois + " " + date.getFullYear() %></h1>
-            <h3>Nom : <%= agenda.nom %> </h3>
-            <h4>Description : <%= agenda.description %> </h4>
-            <h4>Créateur de cet agenda : <%= agenda.createurEmail %> </h4>
-            <div class="view-switch">
-                <form action="/agenda" method ="GET">
-                    <button>Page Principale</button>
-                </form>
-                <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
-                    <button>Ajouter un rendez-vous</button>
+            <div>
+                <h1><%= mois + " " + date.getFullYear() %></h1>
+                <h3>Nom : <%= agenda.nom %> </h3>
+                <h4>Description : <%= agenda.description %> </h4>
+                <h4>Créateur de cet agenda : <%= agenda.createurEmail %> </h4>
+                <div class="view-switch">
+                    <form action="/agenda" method ="GET">
+                        <button>Page Principale</button>
+                    </form>
+                    <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
+                        <button>Ajouter un rendez-vous</button>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div>
+                <h4> Afficher les autres agendas</h4>
+
+                <!-- tester ici pour afficher les parametres ? dans url -->
+                <!--<h3><%=//"test " + JSON.stringify(req.query) %></h3> -->
+
+                <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>" >
+
+                    <!-- Ne pas changer la date si on soumet ce formulaire -->
+                    <input type="hidden" name="semaine" value="<%= semaine %>" />
+                    <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                    <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+
+                    <%
+                    // Parcours la liste des agendas dans la bdd
+                    agendas.forEach(agendaElement => {
+                        if(!(agendaElement.id == agenda.id)){ %>
+                            <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
+                            <input type="checkbox" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
+                            <% if(req.query[agendaElement.nom]){ %> checked <%} %> >
+                            <br>
+                        <%}
+                        });
+                    %>
+                    <br>
+                    <button type="submit"> Mettre à jour affichage </button>
                 </form>
             </div>
             <hr>
@@ -27,107 +58,175 @@
 
         <!-- Navigation des semaines/mois/annee -->
         <div class="nav-buttons">
-            <% 
+            <%
+                let jourPrecedent;
                 let semainePrecedente;
+                let numJourActuelPrecedent;
                 let moisPrecedent = moisParametre;
                 let anneePrecedent = anneeParametre;
-                if (semaine > 1) {
-                    semainePrecedente = semaine - 1;
+                
+                if(numJourActuel < 2){
+                    numJourActuelPrecedent = nombreJours2;
+                }else {
+                    numJourActuelPrecedent = numJourActuel - 1;
+                }
+
+                let numJourPrecedent = numJourActuelPrecedent;
+
+                if (jourParametre2 > 0){
+                    jourPrecedent = jourParametre2 - 1;
+                    semainePrecedente = semaine;
                 } else {
-                    semainePrecedente = 5;
-                    moisPrecedent = moisParametre - 1;
-                    if (moisPrecedent < 0) {
-                        moisPrecedent = 11;
-                        anneePrecedent = anneeParametre - 1;
+                    jourPrecedent = 6;
+                    if (semaine > 1) {
+                        semainePrecedente = semaine - 1;
+                    } else {
+                        semainePrecedente = 5;
+                        moisPrecedent = moisParametre - 1;
+                        if (moisPrecedent < 0) {
+                            moisPrecedent = 11;
+                            anneePrecedent = anneeParametre - 1;
+                        }
                     }
                 }
             %>
-            <form method="GET" action="/rendezvous/<%= agenda.id %>">
+            <form id="jourPrecedent" method="GET" action="/rendezvous/<%=agenda.id%>/jour" >
+                <input type="hidden" name="jourParametre2" value="<%=jourPrecedent%>"/>
                 <input type="hidden" name="semaine" value="<%= semainePrecedente %>" />
                 <input type="hidden" name="moisParametre" value="<%= moisPrecedent %>" />
                 <input type="hidden" name="anneeParametre" value="<%= anneePrecedent %>" />
-                <button type="submit">Semaine Précédente</button>
+                <input type="hidden" name="numJourActuel" value="<%= numJourPrecedent%>"/>
+                <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                <button type="submit">Jour Précédent</button>
+            </form>
+
+            <form id="Vue Hebdomadaire" method="GET" action="/rendezvous/<%=agenda.id%>" >
+                <input type="hidden" name="semaine" value="<%= semaine %>" />
+                <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+                <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                <button type="submit">Vue Hebdomadaire</button>
             </form>
 
             <%
+                let jourSuivant;
                 let semaineSuivante;
+                let numJourActuelSuivant;
+
+                if(numJourActuel >= nombreJours){
+                    numJourActuel = 0;
+                }
+                numJourActuelSuivant = numJourActuel + 1;
+
+                let numJourSuivant = numJourActuelSuivant;
                 let moisSuivant = moisParametre;
                 let anneeSuivant = anneeParametre;
-                if (semaine < 5) {
-                    semaineSuivante = semaine + 1;
-                } else {
-                    semaineSuivante = 1;
-                    moisSuivant = moisParametre + 1;
-                    if (moisSuivant > 11) {
-                        moisSuivant = 0; 
-                        anneeSuivant = anneeParametre + 1;
+                
+                if (jourParametre2 < 6){
+
+                    jourSuivant = jourParametre2 + 1;
+                    semaineSuivante = semaine;
+
+                } else{
+
+                    jourSuivant = 0;
+                    if (semaine < 5) {
+                        semaineSuivante = semaine + 1;
+                    } else {
+                        semaineSuivante = 1;
+                        moisSuivant = moisParametre + 1;
+                        if (moisSuivant > 11) {
+                            moisSuivant = 0; 
+                            anneeSuivant = anneeParametre + 1;
+                        }
                     }
                 }
             %>
-            <form method="GET" action="/rendezvous/<%= agenda.id %>">
+            <form id="jourSuivant" method="GET" action="/rendezvous/<%=agenda.id%>/jour" >
+                <input type="hidden" name="jourParametre2" value="<%=jourSuivant%>"/>
                 <input type="hidden" name="semaine" value="<%= semaineSuivante %>" />
                 <input type="hidden" name="moisParametre" value="<%= moisSuivant %>" />
                 <input type="hidden" name="anneeParametre" value="<%= anneeSuivant %>" />
-                <button type="submit">Semaine Suivante</button>
+                <input type="hidden" name="numJourActuel" value="<%= numJourSuivant%>"/>
+                <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                <button type="submit">Jour Suivant</button>
             </form>
         </div>
 
         <div class="calendar-grid">
+            <%let journom;
+            switch (jourParametre2){
+                case 0:
+                    journom = "Lundi";
+                    break
+                case 1:
+                    journom = "Mardi";
+                    break
+                case 2:
+                    journom = "Mercredi";
+                    break
+                case 3:
+                    journom = "Jeudi";
+                    break
+                case 4:
+                    journom = "Vendredi";
+                    break
+                case 5:
+                    journom = "Samedi";
+                    break
+                case 6:
+                    journom = "Dimanche";
+                    break
+            }
+            %>
             <div class="day-label">Horaires</div>
-            <div class="day-label">Lun.</div>
-            <!-- <div class="day-label">Mar.</div>
-            <div class="day-label">Mer.</div>
-            <div class="day-label">Jeu.</div>
-            <div class="day-label">Ven.</div>
-            <div class="day-label">Sam.</div>
-            <div class="day-label">Dim.</div> -->
+            <div class="day-label"><%=journom%></div>
 
             <!-- Les horaires de 00h à 23h -->
             <% 
                 for (let hour = 0; hour < 24; hour++) { 
             %>
                 <div class="day-label"><%= (hour) + "h" %></div>
-                <% 
-                    const premierJourAffichage = (semaine - 1) * 7 - caseDepart;
-                    for (let i = 0; i < 1; i++) {
-                        const jour = premierJourAffichage + i;
-                %>  
 
-                        <% if (jour >= 0 && jour < nombreJours) { %>
-                            <div class="day-cell"> <%= (hour == 0) ? jour + 1 : "" %> 
+                            <div class="day-cell"> <%= (hour == 0) ? numJourActuel : "" %> 
                                 <% 
                                 // Parcours la liste des rendez-vous et affiche leurs attributs
                                 rendezVousList.forEach(rendezvous => { 
                                     %>
                                                                                 
-                                            <%    
-                                                if(jour + 1 == rendezvous.dateRendezVous.getDate()){
-                                                    if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                        <div style="cursor: pointer;" class="rendez-vous-cell<%=rendezvous.couleur%>" onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
-                                                        <%="Nom :" +  rendezvous.nom%>
+                                        <% if(numJourActuel == rendezvous.dateRendezVous.getDate()){
+                                            if(hour == rendezvous.dateRendezVous.getHours()){ %>
+                                                <div style="cursor: pointer;"
+                                                    class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
+                                                    onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                    <%="Nom :" +  rendezvous.nom%>
+                                                    <br>
+                                                    <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
+                                                    <br>
+                                                    <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
+                                                    <% if(rendezvous.estRecurrent) { %>
                                                         <br>
-                                                        <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
-                                                        <br>
-                                                        <%="Durée :" +  rendezvous.duree.heures + "h" + rendezvous.duree.minutes + "min"%>
-                                                    </div>
-                                                    <%}
-                                                }
-                                                
-                                            %>  
+                                                        <span class="recurrence-info">
+                                                            <%= rendezvous.typeRecurrence === 'quotidien' ? '(Quotidien)' :
+                                                                rendezvous.typeRecurrence === 'semaine' ? '(Hebdomadaire)' :
+                                                                rendezvous.typeRecurrence === 'mensuel' ? '(Mensuel)' : '' %>
+                                                        </span>
+                                                    <% } %>
+                                                </div>
+                                            <%}
+                                        }%> 
                                     <% 
                                     }); 
                                 %>
                             </div> 
-                        <% } else { %>
-                            <div class="day-cell" style="visibility: hidden;"></div>
-                        <% } %>
                 <% 
                     } 
                 %>
             <% 
-                } 
             %>
         </div>
     </div>
+    <script>
+    </script>
 </body>
 </html>
