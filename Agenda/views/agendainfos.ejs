@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <title><%= title %></title>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <form action="/agenda/<%=agendaId%>/modifier" method="POST"> <!-- L'URL correspond à la route POST -->
+        <label for="nom">Nom de l'agenda:</label>
+        <input type="text" id="nom" name="nom" required><br><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br><br>
+
+        <div style="display: none;">
+            <label for="createurEmail">Email du créateur:</label>
+            <input type="email" id="createurEmail" name="createurEmail" value="<%= userEmailConnected %>" style="background-color: lightgrey;" readonly required> <br><br>
+        </div>
+
+        <button type="submit">Appliquer les modifications</button>
+    </form>
+</body>
+</html>
