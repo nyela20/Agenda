@@ -81,6 +81,11 @@
                 <button type="submit">Semaine Précédente</button>
             </form>
 
+            <form id="jour" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
+                <input type="hidden" name="jourParametre2" value ="<%=caseDepart%>"/>
+                <button type="submit">Vue Journalière</button>
+            </form>
+
             <%
                 let semaineSuivante;
                 let moisSuivant = moisParametre;
