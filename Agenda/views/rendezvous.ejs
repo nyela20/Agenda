@@ -26,7 +26,6 @@
             </div>
             <hr>
             <div>
-                <h4> Afficher les autres agendas</h4>
 
                 <!-- tester ici pour afficher les parametres ? dans url -->
                 <!--<h3><%=//"test " + JSON.stringify(req.query) %></h3> -->
@@ -37,6 +36,8 @@
                     <input type="hidden" name="semaine" value="<%= semaine %>" />
                     <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
                     <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+
+                    <h4> Mes agendas </h4>
 
                     <%
                     // Parcours la liste des agendas dans la bdd
@@ -49,6 +50,21 @@
                         <%}
                         });
                     %>
+
+                    <h4> Agendas partagés avec mois </h4>
+
+                    <%
+                    // Parcours la liste des agendas dans la bdd
+                    agendasPartages.forEach(agendaElement => {
+                        if(!(agendaElement.id == agenda.id)){ %>
+                            <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
+                            <input type="checkbox" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
+                            <% if(req.query[agendaElement.nom]){ %> checked <%} %> >
+                            <br>
+                        <%}
+                        });
+                    %>
+
                     <br>
                     <button type="submit"> Mettre à jour affichage </button>
                 </form>
