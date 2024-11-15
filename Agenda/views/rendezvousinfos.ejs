@@ -78,7 +78,6 @@
             let maxHours;
             maxHours = Math.floor(maxMinutesBeforeMidnight / 60); // Heure maximale
             let maxMinutes = (maxMinutesBeforeMidnight % 60) // Minutes restantes
-            alert(maxHours + " " + maxMinutes + " " + heuresInput.value)
             if(parseInt(maxHours) - parseInt(heuresInput.value) > 0){
                 maxMinutes = 60
             }else{
@@ -90,7 +89,6 @@
                 heuresInput.value = parseInt(heuresInput.value) + 1
                 minutesInput.value = 0
             }
-            alert(maxHours + " " + maxMinutes)
             heuresInput.max = maxHours;
             minutesInput.max = maxMinutes;
         };
