@@ -24,6 +24,10 @@ const agendaSchema = new mongoose.Schema({
     trim: true,
     //match: [/.+@.+\..+/, 'Email invalide'] 
   },
+  couleur :{
+    type : Number,
+    required : true
+  },
   rendezVous: [{
     type: [String]
   }],

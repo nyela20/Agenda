@@ -156,7 +156,9 @@
                                                                                 
                                         <% if(jour + 1 == rendezvous.dateRendezVous.getDate()){
                                             if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                <div style="cursor: pointer;"
+                                                <% let tailleRdvCell = -105 * (rendezvous.duree.heures-1) %>
+                                                <% let margeminutes = Math.floor((rendezvous.dateRendezVous.getMinutes() * 100) / 60) %>
+                                                <div style="cursor: pointer; margin-bottom:<%=tailleRdvCell%>px; top: <%=margeminutes%>px"
                                                     class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
                                                     onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
                                                     <%="Nom :" +  rendezvous.nom%>
@@ -190,7 +192,6 @@
             %>
         </div>
     </div>
-    <script>
-    </script>
+    
 </body>
 </html>

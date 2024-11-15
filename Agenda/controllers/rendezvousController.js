@@ -6,7 +6,6 @@ exports.creerRendezVous = async (req, res) => {
   try {
     const {
       nom,
-      couleur,
       description,
       dateRendezVous,
       participants,
@@ -43,7 +42,7 @@ exports.creerRendezVous = async (req, res) => {
             heures: dureeHeures,
             minutes: dureeMinutes
           },
-          couleur,
+          couleur : agenda.couleur,
           estRecurrent: true,
           typeRecurrence,
           finRecurrence: dateFin
@@ -93,7 +92,7 @@ exports.creerRendezVous = async (req, res) => {
           heures: dureeHeures,
           minutes: dureeMinutes
         },
-        couleur
+        couleur : agenda.couleur
       });
 
       // sauvegarde

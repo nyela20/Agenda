@@ -7,38 +7,24 @@
 </head>
 <body>
     <h1><%= title %></h1>
-    <form action="/rendezvous/<%= agendaId %>/creer" method="POST">
+    <form id="createrendezvous" action="/rendezvous/<%= agendaId %>/creer" method="POST">
         <label for="nom">Nom du rendez-vous :</label>
         <input type="text" id="nom" name="nom" required><br><br>
 
         <label for="description">Description :</label>
         <input type="text" id="description" name="description"><br><br>
 
-        <label for="couleur">Choisissez une couleur :</label>
-        <select id="couleur" name="couleur" required>
-            <option value="">Sélectionnez une couleur</option>
-            <option value="0">Rouge</option>
-            <option value="1">Bleu</option>
-            <option value="2">Vert</option>
-            <option value="3">Jaune</option>
-            <option value="4">Noir</option>
-            <option value="5">Blanc</option>
-            <option value="6">Violet</option>
-            <option value="7">Orange</option>
-        </select>
-        <br><br>
-
         <label for="dateRendezVous">Date du rendez-vous :</label>
-        <input type="datetime-local" id="dateRendezVous" name="dateRendezVous"><br><br>
+        <input type="datetime-local" id="dateRendezVous" name="dateRendezVous" required><br><br>
 
         <label for="dureeHeures">Durée (heures) :</label>
-        <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="1" required>
+        <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="0" required>
 
         <label for="dureeMinutes">(minutes) :</label>
-        <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" max="59" value="0" required><br><br>
+        <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="0" required><br><br>
         
         <label style="visibility: hidden;" for="createurEmail">Createur :</label>
-        <input name="createurEmail" value="<%= userEmailConnected %> " style="visibility: hidden;" readonly required> <br>
+        <input name="createurEmail" value="<%= userEmailConnected %>" style="visibility: hidden;" readonly required> <br>
 
         <!-- Nouveaux champs pour la récurrence -->
         <div class="form-group">
@@ -61,13 +47,15 @@
             </div>
         </div>
 
-
-
         <button type="submit">Créer le Rendez-vous</button>
     </form>
     <br>
     <div>
         <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
+    </div>
+
+    <div id="error-message" style="color: red; display: none;">
+        La durée du rendez-vous doit être d'au moins 30 minutes.
     </div>
 
     <script>
@@ -93,7 +81,62 @@
 
         // Cacher initialement les options de récurrence
         document.getElementById('optionsRecurrence').style.display = 'none';
-    </script>
 
+        // Fonction pour ajuster la durée maximale
+        const dateInput = document.getElementById("dateRendezVous");
+        const heuresInput = document.getElementById("dureeHeures");
+        const minutesInput = document.getElementById("dureeMinutes");
+
+
+        const ajusterDureeMaximale = (date, heure, minutes) => {
+            if(date){
+                heuresInput.value = 0;
+                minutesInput.value = 0;
+            }
+            // Extraire l'heure et les minutes de l'heure de début
+            const dateTime = new Date(dateInput.value);
+            const startHour = dateTime.getHours();
+            const startMinutes = dateTime.getMinutes();
+            // Calcul du temps restant avant minuit (23h59)
+            const maxMinutesBeforeMidnight = (23 - startHour) * 60 + (60 - startMinutes);
+            // Calculer les limites pour les heures et les minutes
+            let maxHours;
+            maxHours = Math.floor(maxMinutesBeforeMidnight / 60); // Heure maximale
+            let maxMinutes = (maxMinutesBeforeMidnight % 60) // Minutes restantes
+            alert(maxHours + " " + maxMinutes + " " + heuresInput.value)
+            if(parseInt(maxHours) - parseInt(heuresInput.value) > 0){
+                maxMinutes = 60
+            }else{
+                if(parseInt(maxHours) == parseInt(heuresInput.value)){
+                    minutesInput.value = maxMinutes
+                }
+            }
+            if(minutesInput.value >= 60){
+                heuresInput.value = parseInt(heuresInput.value) + 1
+                minutesInput.value = 0
+            }
+            alert(maxHours + " " + maxMinutes)
+            heuresInput.max = maxHours;
+            minutesInput.max = maxMinutes;
+        };
+
+        heuresInput.addEventListener("change", () => { ajusterDureeMaximale(false, true, false); });
+        minutesInput.addEventListener("change", () => { ajusterDureeMaximale(false, false, true);});
+        dateInput.addEventListener("change", () =>{ ajusterDureeMaximale(true, false, false);});
+        
+        // gestion de la soumission du formulaire
+        document.getElementById('createrendezvous').addEventListener('submit', function(event) {
+            const heures = parseInt(heuresInput.value);
+            const minutes = parseInt(minutesInput.value);
+            const totalMinutes = heures * 60 + minutes;  // calcul de la durée totale en minutes
+
+            // verifier si la durée du rdv est inferieure à 30 minutes
+            if (totalMinutes < 30) {
+                document.getElementById('error-message').style.display = 'block'; // Afficher le message
+                event.preventDefault(); // empecher la soumission du formulaire
+            }
+        });
+
+    </script>
 </body>
 </html>

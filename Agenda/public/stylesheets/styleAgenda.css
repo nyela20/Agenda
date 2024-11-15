@@ -11,11 +11,12 @@
 
 .day-cell {
     background-color: #c5ffd2;
-    padding: 10px;
-    min-height: 40px;
+    height: 100px;
     position: relative;
-    box-shadow: 0px 20px 0px #c5ffd2;
+    /*box-shadow: 0px 20px 0px #c5ffd2;*/
     display: inline-flex;
+    position: relative;
+    overflow: visible; /* Permet cellule rdv de dépasser */
 }
 
 .nav-buttons {
@@ -27,8 +28,11 @@
 /* Style de base pour toutes les classes rendez-vous-cell */
 [class^="rendez-vous-cell"] {
     border: 1px solid;
-    padding: 10px;
     text-align: center;
+    position: relative;
+    z-index: 10;
+    min-height: 100px;
+    white-space: nowrap; /* Empêche le texte de se couper */
 }
   
 /* Couleurs spécifiques */

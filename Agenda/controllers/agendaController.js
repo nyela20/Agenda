@@ -3,13 +3,14 @@ const Agenda = require('../models/agenda');
 // creation/sauvegarde agenda dans bdd
 exports.creerAgenda = async (req, res) => {
   try {
-    const { nom, description, participants, createurEmail, rendezVous } = req.body;
+    const { nom, description, couleur, participants, createurEmail, rendezVous } = req.body;
     const nouvelAgenda = new Agenda({
       nom,
       description,
       participants,
       createurEmail,
-      rendezVous
+      rendezVous,
+      couleur : couleur
     });
     const agendaSauvegarde = await nouvelAgenda.save();
     // réponse  réussie
