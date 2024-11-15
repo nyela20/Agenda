@@ -373,6 +373,134 @@ exports.afficherRendezVousJour = async (req, res) => {
   }
 };
 
+// Fonction pour afficher les rendez-vous d'un agenda
+exports.afficherRendezVousJour = async (req, res) => {
+  try {
+    const agendaId = req.params.agendaId;
+    const agenda = await Agenda.findById(agendaId);
+    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
+
+    const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
+
+    if (!agenda) {
+      return res.status(401).send('Agenda non trouvé : ' + agendaId);
+    }
+
+    // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
+    let agendaIds = [agendaId]
+    agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
+
+    //date de systeme actuelle
+    const dateActuelle = new Date();
+
+    // la date et l'heure a afficher
+    let moisParametre =  parseInt(req.query.moisParametre, 10);
+    if(isNaN(moisParametre)){ 
+      // moisParametre = 9; // octobre par defaut
+      moisParametre = dateActuelle.getMonth() ;
+    }
+    let anneeParametre = parseInt(req.query.anneeParametre, 10);
+    if(isNaN(anneeParametre)){ 
+      //anneeParametre = 2024; // par default
+      anneeParametre = dateActuelle.getFullYear(); // année actuelle
+    }
+
+    let jourActuel = dateActuelle.getDate();
+
+    //  debut et fin mois afffiché
+    const debutMois = new Date(anneeParametre , moisParametre , 1);
+    const finMois = new Date(anneeParametre , moisParametre + 1 , 0 ,23,59,59);
+
+    // chercher les rdvs pour mois spécificque
+    const rendezVousList = await RendezVous.find({
+      agenda : {$in : agendaIds},
+      $or: [
+        // rdvs non récurrents
+        {
+          estRecurrent: false,
+          dateRendezVous: {
+            $gte: debutMois,
+            $lte: finMois
+          }
+        },
+        // rdv récurrents =
+        {
+          estRecurrent: true,
+          dateRendezVous: { $lte: finMois },
+          finRecurrence: { $gte: debutMois }
+        }
+      ]
+    });
+
+    // filtrage les rdvs
+    const rendezVousFiltered = rendezVousList.filter(rdv => {
+      if (!rdv.estRecurrent) return true;
+
+      const dateRdv = new Date(rdv.dateRendezVous);
+      const dateFin = new Date(rdv.finRecurrence);
+
+      // rdv récurrents, si la date correspond au motif
+      if (dateRdv.getTime() <= dateFin.getTime()) {
+        switch (rdv.typeRecurrence) {
+          case 'quotidien':
+            return true; // Déjà filtré par la requête MongoDB
+          case 'semaine':
+            const jourSemaine = dateRdv.getDay();
+            // Vérifier si le jour de la semaine correspond
+            return jourSemaine === dateRdv.getDay();
+          case 'mensuel':
+            const jourMois = dateRdv.getDate();
+            // Vérifier si le jour du mois correspond
+            return jourMois === dateRdv.getDate();
+        }
+      }
+      return false;
+    });
+
+
+
+
+
+
+    const date = new Date(anneeParametre, moisParametre, 1);
+
+    // le mois courant en français en utilisant le nom long du mois
+    const mois = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+
+    // le nombre total de jours dans le mois d'avant le mois courant
+    const nombreJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+    // le nombre total de jours dans le mois courant
+    const nombreJours2 = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+
+    // le jour de la semaine du premier jour du mois courant (dimanche = 0, lundi = 1, mardi = 2, ... )
+    const premierJour = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
+    let jourParametre2 = parseInt(req.query.jourParametre2);
+
+    // le nombre de cellule vides avant le premier jour à afficher dans le calendrier
+    //si le premier jour est dimanche (0), on commence à 6 pour décaler correctement
+    const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
+
+    // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
+    const semaine = parseInt(req.query.semaine, 10) || 1;
+    
+    let numJourActuel = parseInt(req.query.numJourActuel);
+    if(isNaN(numJourActuel)){
+      numJourActuel = 1;
+    }
+
+    res.render('rendezvousjour', { req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
+
+  } catch (error) {
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
+  }
+};
+
 //supprimer un rendez vous
 exports.supprimerRendezVous = async (req, res) => {
   try{
