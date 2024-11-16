@@ -11,7 +11,7 @@ exports.createUser = async (req, res) => {
     const { name, email, password , confirmPassword } = req.body;
 
     // validation mail 
-    const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}/;
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     if (!emailRegex.test(email)) {
       return res.status(400).render('register', { error: 'Adresse email invalide.' });
     }
