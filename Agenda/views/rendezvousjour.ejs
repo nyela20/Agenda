@@ -52,6 +52,11 @@
                     <br>
                     <button type="submit"> Mettre à jour affichage </button>
                 </form>
+
+                <form id="chooseDayDate" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
+                    <input type="date" name="dayDate" id="chooseDayDateInput" required>
+                    <button type="submit"> Aller à </button>
+                </form>
             </div>
             <hr>
         </div>

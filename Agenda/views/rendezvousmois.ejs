@@ -68,6 +68,11 @@
                     <br>
                     <button type="submit"> Mettre à jour affichage </button>
                 </form>
+
+                <form id="chooseMonthDate" method="GET" action="/rendezvous/<%=agenda.id%>/mois">
+                    <input type="month" name="monthDate" id="chooseMonthDateInput" required>
+                    <button type="submit"> Aller à </button>
+                </form>
             </div>
             <hr>
         </div>
