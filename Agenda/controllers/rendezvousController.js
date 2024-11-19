@@ -625,6 +625,46 @@ exports.supprimerRendezVous = async (req, res) => {
 
 };
 
+//acepter/refuser rdv
+
+exports.accepterRendezVous = async (req, res, next) => {
+  try {
+    const rendezvousId = req.params.rendezvousId;
+    const rendezvous = await this.getRendezVousById(rendezvousId);
+
+    if (!rendezvous) {
+      return next(createError(404, 'Rendez-vous non trouvé'));
+    }
+
+    rendezvous.accepte = true;
+    rendezvous.refuse = false;
+    await rendezvous.save();
+
+    res.redirect(`/rendezvous/${rendezvousId}`);
+  } catch (error) {
+    next(createError(500, 'Erreur lors de l\'acceptation du rendez-vous'));
+  }
+};
+
+exports.refuserRendezVous = async (req, res, next) => {
+  try {
+    const rendezvousId = req.params.rendezvousId;
+    const rendezvous = await this.getRendezVousById(rendezvousId);
+
+    if (!rendezvous) {
+      return next(createError(404, 'Rendez-vous non trouvé'));
+    }
+
+    rendezvous.refuse = true;
+    rendezvous.accepte = false;
+    await rendezvous.save();
+
+    res.redirect(`/rendezvous/${rendezvousId}`);
+  } catch (error) {
+    next(createError(500, 'Erreur lors du refus du rendez-vous'));
+  }
+};
+
 // Fonction pour obtenir un rendez-vous par ID
 exports.getRendezVousById = async (req) => {
   try {

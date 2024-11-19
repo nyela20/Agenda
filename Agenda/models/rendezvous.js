@@ -57,6 +57,14 @@ const rendezVousSchema = new mongoose.Schema({
     enum: ['aucun' , 'quotidien' , 'semaine' , 'mensuel'],
     default: 'aucun'
   },
+  accepte: {
+    type: Boolean,
+    default: false
+  },
+  refuse: {
+    type: Boolean,
+    default: false
+  },
   finRecurrence:{
     type: Date,
     required : function(){

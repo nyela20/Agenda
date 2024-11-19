@@ -70,6 +70,16 @@ router.post('/:agendaId/modifier/:rendezvousId', async function(req, res, next) 
     await rendezVousController.modifierRendezVous(req, res, next);
 });
 
+// Accepter le rdv
+router.post('/:agendaId/accepter/:rendezvousId', async function(req, res, next) {
+    await rendezVousController.accepterRendezVous(req, res, next);
+});
+
+
+// Refuser le rdv
+router.post('/:agendaId/refuser/:rendezvousId', async function(req, res, next) {
+    await rendezVousController.refuserRendezVous(req, res, next);
+});
 
 // création d'un nouveau rendez-vouS
 router.post('/:agendaId/creer', async function(req, res, next) {

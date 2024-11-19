@@ -123,6 +123,36 @@ exports.annulerPartage = async (req, res) => {
   }
 };
 
+// suppression d un agenda dans la BDD
+exports.supprimerAgenda = async (req, res) => {
+  try {
+    const agendaId = req.params.id;
+
+    const agenda = await Agenda.findById(agendaId);
+    if (!agenda) {
+      return res.status(404).json({
+        message: 'Agenda non trouvé'
+      });
+    }
+
+    const userEmail = localStorage.getItem('userEmail');
+    if (agenda.createurEmail !== userEmail) {
+      return res.status(403).json({
+        message: 'Vous n\'avez pas les droits pour supprimer cet agenda'
+      });
+    }
+
+    await Agenda.findByIdAndDelete(agendaId);
+    res.redirect('/agenda');
+
+  } catch (error) {
+    res.status(500).json({
+      message: 'Erreur lors de la suppression de l\'agenda',
+      error: error.message
+    });
+  }
+};
+
 // modifier un agenda 
 exports.modifierAgenda = async (req, res) => {
   try {
