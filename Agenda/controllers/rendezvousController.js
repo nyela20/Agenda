@@ -151,18 +151,74 @@ exports.afficherRendezVous = async (req, res) => {
     //date de systeme actuelle
     const dateActuelle = new Date();
 
-    // la date et l'heure a afficher
-    let moisParametre =  parseInt(req.query.moisParametre, 10);
-    if(isNaN(moisParametre)){ 
-      // moisParametre = 9; // octobre par defaut
-      moisParametre = dateActuelle.getMonth() ;
+    let temp = req.query.weekDate;
+    if(temp != undefined){
+      temp2 = new Date(temp);
     }
-    let anneeParametre = parseInt(req.query.anneeParametre, 10);
-    if(isNaN(anneeParametre)){ 
-      //anneeParametre = 2024; // par default
-      anneeParametre = dateActuelle.getFullYear(); // année actuelle
-    }
+    
+    let moisParametre;
+    let anneeParametre;
+    let nbsemaine = 0;
 
+    if(temp != undefined){
+
+      let nbjours = 0;
+
+      let annee2;
+      let semaine2;
+      let mois2 = 1;
+
+      valeurs = temp.split('-W');
+      annee2 = parseInt(valeurs[0]);
+      semaine2 = parseInt(valeurs[1]);
+
+      let dte = new Date(annee2, 1, 0).getDate();
+      let premierJour = new Date(annee2, 0, 1).getDay();
+
+      if(premierJour != 1){
+        let missingWeekDays;
+        if(premierJour == 0){
+          missingWeekDays = 1 - 7 ;
+        }else{
+          missingWeekDays = 1 - premierJour;
+        }
+        nbjours = missingWeekDays;
+        nbsemaine++;
+      }
+
+      for(i = 0; i < semaine2 && mois2 < 12;i++){
+        nbsemaine++;
+        nbjours = nbjours + 7;
+        if( nbjours > dte){
+          nbjours = nbjours - dte;
+          mois2++;
+          dte = new Date(annee2,mois2,0).getDate();
+          nbsemaine = 1;
+        }else if(nbjours == dte){
+          nbjours = 0;
+          mois2++;
+          dte = new Date(annee2,mois2,0).getDate();
+          nbsemaine = 0;
+        }
+      }
+
+      moisParametre = mois2 - 1;
+      anneeParametre = annee2;
+
+    }else{
+      // la date et l'heure a afficher
+      moisParametre =  parseInt(req.query.moisParametre, 10);
+      if(isNaN(moisParametre)){ 
+        // moisParametre = 9; // octobre par defaut
+        moisParametre = dateActuelle.getMonth() ;
+      }
+      anneeParametre = parseInt(req.query.anneeParametre, 10);
+      if(isNaN(anneeParametre)){ 
+        //anneeParametre = 2024; // par default
+        anneeParametre = dateActuelle.getFullYear(); // année actuelle
+      }
+    }
+    
     let jourActuel = dateActuelle.getDate();
 
     //  debut et fin mois afffiché
@@ -244,7 +300,7 @@ exports.afficherRendezVous = async (req, res) => {
     const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
 
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
-    const semaine = parseInt(req.query.semaine, 10) || 1;
+    const semaine = (temp != undefined) ? nbsemaine : parseInt(req.query.semaine, 10) || 1;
 
     res.render('rendezvous', {quotidientFiltre,semaineFiltre,mensuelFiltre,  emailFiltre, nomFiltre, req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
 
@@ -273,20 +329,38 @@ exports.afficherRendezVousJour = async (req, res) => {
         agendaIds.push(agenda.id)
       }
     });
-
+    
     //date de systeme actuelle
     const dateActuelle = new Date();
 
-    // la date et l'heure a afficher
-    let moisParametre =  parseInt(req.query.moisParametre, 10);
-    if(isNaN(moisParametre)){ 
-      // moisParametre = 9; // octobre par defaut
-      moisParametre = dateActuelle.getMonth() ;
-    }
-    let anneeParametre = parseInt(req.query.anneeParametre, 10);
-    if(isNaN(anneeParametre)){ 
-      //anneeParametre = 2024; // par default
-      anneeParametre = dateActuelle.getFullYear(); // année actuelle
+    let temp = req.query.dayDate;
+    let temp2;
+
+    let moisParametre;
+    let anneeParametre;
+    let numJourActuel;
+    let jourParametre2;
+
+    if(temp != undefined){
+      temp2 = new Date(temp);
+      moisParametre = parseInt(temp2.getMonth());
+      anneeParametre = parseInt(temp2.getFullYear());
+      numJourActuel = parseInt(temp2.getDate());
+
+    }else if(temp == undefined){
+      // la date et l'heure a afficher
+      moisParametre =  parseInt(req.query.moisParametre, 10);
+      if(isNaN(moisParametre)){ 
+        // moisParametre = 9; // octobre par defaut
+        moisParametre = dateActuelle.getMonth() ;
+      }
+      anneeParametre = parseInt(req.query.anneeParametre, 10);
+      if(isNaN(anneeParametre)){ 
+        //anneeParametre = 2024; // par default
+        anneeParametre = dateActuelle.getFullYear(); // année actuelle
+      }
+      jourParametre2 = parseInt(req.query.jourParametre2);
+      numJourActuel = parseInt(req.query.numJourActuel);
     }
 
     let jourActuel = dateActuelle.getDate();
@@ -360,18 +434,28 @@ exports.afficherRendezVousJour = async (req, res) => {
     // le jour de la semaine du premier jour du mois courant (dimanche = 0, lundi = 1, mardi = 2, ... )
     const premierJour = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-    let jourParametre2 = parseInt(req.query.jourParametre2);
-
     // le nombre de cellule vides avant le premier jour à afficher dans le calendrier
     //si le premier jour est dimanche (0), on commence à 6 pour décaler correctement
     const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
 
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
-    const semaine = parseInt(req.query.semaine, 10) || 1;
+    const semaine = (temp != undefined) ? ( ( parseInt(temp2.getDate()) ) / 7 ) : parseInt(req.query.semaine, 10) || 1;
     
-    let numJourActuel = parseInt(req.query.numJourActuel);
     if(isNaN(numJourActuel)){
       numJourActuel = 1;
+    }
+    //gère la valeur de Parametre2 pour l'affichage du nom des jours lorsqu'on change avec la sélection de jours
+    if(temp != undefined){
+      jourParametre2 = parseInt(temp2.getDate());
+      if(jourParametre2 > 6){
+        jourParametre2 = ((jourParametre2 - caseDepart) % 7);
+      }else{
+        if( ( ((jourParametre2 + caseDepart) % 7) - 1 ) < 0){
+          jourParametre2 = 7 + ( ((jourParametre2 + caseDepart) % 7) - 1 );
+        }else{
+          jourParametre2 = ( ((jourParametre2 + caseDepart) % 7) - 1 );
+        }
+      }
     }
 
     res.render('rendezvousjour', { req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
@@ -415,16 +499,29 @@ exports.afficherRendezVousMois = async (req, res) => {
     //date de systeme actuelle
     const dateActuelle = new Date();
 
-    // la date et l'heure a afficher
-    let moisParametre =  parseInt(req.query.moisParametre, 10);
-    if(isNaN(moisParametre)){ 
-      // moisParametre = 9; // octobre par defaut
-      moisParametre = dateActuelle.getMonth() ;
-    }
-    let anneeParametre = parseInt(req.query.anneeParametre, 10);
-    if(isNaN(anneeParametre)){ 
-      //anneeParametre = 2024; // par default
-      anneeParametre = dateActuelle.getFullYear(); // année actuelle
+    let temp = req.query.monthDate;
+    console.log(temp);
+
+    let moisParametre;
+    let anneeParametre;
+
+    if(temp != undefined){
+      valeurs = temp.split('-');
+      console.log(valeurs);
+      anneeParametre = parseInt(valeurs[0]);
+      moisParametre = (parseInt(valeurs[1]) - 1);
+    }else{
+      // la date et l'heure a afficher
+      moisParametre =  parseInt(req.query.moisParametre, 10);
+      if(isNaN(moisParametre)){ 
+        // moisParametre = 9; // octobre par defaut
+        moisParametre = dateActuelle.getMonth() ;
+      }
+      anneeParametre = parseInt(req.query.anneeParametre, 10);
+      if(isNaN(anneeParametre)){ 
+        //anneeParametre = 2024; // par default
+        anneeParametre = dateActuelle.getFullYear(); // année actuelle
+      }
     }
 
     let jourActuel = dateActuelle.getDate();

@@ -70,6 +70,11 @@
                     <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
                     <button type="submit"> Mettre à jour affichage </button>
                 </form>
+
+                <form id="chooseWeekDate" method="GET" action="/rendezvous/<%=agenda.id%>">
+                    <input type="week" name="weekDate" id="chooseWeekDateInput" required>
+                    <button type="submit"> Aller à </button>
+                </form>
             </div>
             <hr>
         </div>
