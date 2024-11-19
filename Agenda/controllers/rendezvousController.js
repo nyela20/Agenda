@@ -126,8 +126,8 @@ exports.afficherRendezVous = async (req, res) => {
     const userConnected = localStorage.getItem("userEmail");
     const agendas = await Agenda.find({ createurEmail: userConnected });
 
-    const agendasPartages = await Agenda.find({ 
-      "partages.email": userConnected 
+    const agendasPartages = await Agenda.find({
+      "partages.email": userConnected
     });
 
     if (!agenda) {
@@ -169,6 +169,13 @@ exports.afficherRendezVous = async (req, res) => {
     const debutMois = new Date(anneeParametre , moisParametre , 1);
     const finMois = new Date(anneeParametre , moisParametre + 1 , 0 ,23,59,59);
 
+    // appliquer les filtres
+    const nomFiltre = req.query.nomFiltre;
+    const emailFiltre = req.query.emailFiltre;
+    const quotidientFiltre = req.query.quotidientFiltre;
+    const semaineFiltre = req.query.semaineFiltre;
+    const mensuelFiltre = req.query.mensuelFiltre;
+
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
       agenda : {$in : agendaIds},
@@ -187,7 +194,13 @@ exports.afficherRendezVous = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ]
+      ],
+      ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
+      ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}), // i insensible a la case
+      ...(quotidientFiltre ? { typeRecurrence : "quotidient" } : {}),
+      ...(semaineFiltre ? { typeRecurrence : "semaine" } : {}),
+      ...(mensuelFiltre ? { typeRecurrence : "mensuel" } : {})
+
     });
 
     // filtrage les rdvs
@@ -215,11 +228,6 @@ exports.afficherRendezVous = async (req, res) => {
       return false;
     });
 
-
-
-
-
-
     const date = new Date(anneeParametre, moisParametre, 1);
 
     // le mois courant en français en utilisant le nom long du mois
@@ -238,7 +246,7 @@ exports.afficherRendezVous = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezvous', { req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
+    res.render('rendezvous', {quotidientFiltre,semaineFiltre,mensuelFiltre,  emailFiltre, nomFiltre, req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
