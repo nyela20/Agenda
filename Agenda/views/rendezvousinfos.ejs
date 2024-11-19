@@ -47,6 +47,12 @@
     <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rendezvous.id%>" method="POST">
             <button>Supprimer le Rendez-Vous</button>
     </form>
+    <form action="/rendezvous/<%=agendaId%>/accepter/<%= rendezvous.id %>" method="POST">
+        <button>Accepter le Rendez-vous</button>
+    </form>
+    <form action="/rendezvous/<%=agendaId%>/refuser/<%= rendezvous.id %>" method="POST">
+        <button>Refuser le Rendez-Vous</button>
+    </form>
 
     
     <br>

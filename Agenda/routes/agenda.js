@@ -15,6 +15,11 @@ router.post('/creer' , async function(req ,res, next){
     await agendaController.creerAgenda(req, res, next);
 });
 
+// suppression agenda
+router.get('/supprimer/:id', async function(req, res, next) {
+    await agendaController.supprimerAgenda(req, res, next);
+});
+
 // Routes pour le partage
 router.post('/:agendaId/partager', agendaController.partagerAgenda);
 router.post('/:agendaId/annuler-partage', agendaController.annulerPartage);
