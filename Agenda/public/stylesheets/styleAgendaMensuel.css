@@ -13,7 +13,10 @@
     background-color: #c5ffd2;
     height: 100px;
     position: relative;
+    /*box-shadow: 0px 20px 0px #c5ffd2;*/
     display: inline-flex;
+    position: relative;
+    overflow: visible; /* Permet cellule rdv de dépasser */
 }
 
 .nav-buttons {
