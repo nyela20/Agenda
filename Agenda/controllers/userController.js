@@ -104,8 +104,12 @@ exports.updateUserByMail = async (req, res) => {
     const oldMail = localStorage.getItem("userEmail");
     
     await User.updateOne({"email":oldMail},{$set:{"nom":nom,"email":email}});
-
-
+    
+    temp = await Agenda.find({"partages.email":oldMail});
+    
+    for(let agenda of temp){
+      await Agenda.updateOne({_id : agenda._id ,"partages.email":oldMail},{$set:{"partages.$.email":email}})
+    }
 
     await RendezVous.updateMany({"createurEmail":oldMail},{$set:{"createurEmail":email}});
 
