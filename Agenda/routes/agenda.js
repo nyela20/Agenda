@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const agendaController = require('../controllers/agendaController');
+//multer pour importer et exporter
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
 
 // afficher la page principale
 router.get('/', agendaController.afficherAgendas);
@@ -34,5 +38,17 @@ router.get('/:agendaId/modifier' , function(req ,res){
 router.post('/:agendaId/modifier' , async function(req ,res, next){
     await agendaController.modifierAgenda(req, res, next);
 });
+
+
+// route export agenda
+router.get('/export/:id', async function (req, res, next) {
+    await agendaController.exportAgenda(req, res, next);
+});
+
+// route import agenda
+router.post('/import', upload.single('file'), async function (req, res, next) {
+    await agendaController.importAgenda(req, res, next);
+});
+
 
 module.exports = router;
