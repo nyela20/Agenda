@@ -42,4 +42,11 @@ router.get('/forgot-password' , async function(req ,res){
 // traite  du formulaire
 router.post('/forgot-password',userController.forgotPassword);
 
+//router.post('/reset-password' , userController.getResetPassword)
+
+router.get('/reset-password/:token', userController.getResetPassword);
+
+router.post('/reset-password/:token', userController.postResetPassword);
+
+
 module.exports = router;
