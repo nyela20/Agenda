@@ -34,6 +34,22 @@
         <br><br>
 
         <button type="submit">Créer Agenda</button>
+
+        <form action="/agenda/importer" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
+            <label for="file">Importer un agenda:</label>
+            <input type="file" id="file" name="file" accept=".csv">
+            <button type="submit">Importer</button>
+        </form>
+
     </form>
+
+    <script>
+        document.querySelector('button[name="importer"]').addEventListener('click', function() {
+            document.getElementById('file').required = true;
+        });
+        document.querySelector('button[name="creer"]').addEventListener('click', function() {
+            document.getElementById('file').required = false;
+        });
+    </script>
 </body>
 </html>

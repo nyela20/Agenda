@@ -1,4 +1,8 @@
-const Agenda = require('../models/agenda'); 
+const Agenda = require('../models/agenda');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const fs = require('fs');
+const path = require('path');
+const RendezVous = require('../models/rendezvous');
 
 // creation/sauvegarde agenda dans bdd
 exports.creerAgenda = async (req, res) => {
@@ -180,5 +184,126 @@ exports.modifierAgenda = async (req, res) => {
     res.redirect('/agenda'); // rediger vers la page principale
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la modification de l\'agenda', error: error.message });
+  }
+};
+
+exports.exportAgenda = async (req, res, next) => {
+  try {
+    const agendaId = req.params.id;
+
+    const agenda = await Agenda.findById(agendaId).populate('rendezVous');
+    if (!agenda) return res.status(404).send("Agenda not found.");
+
+    const exportDir = path.join(__dirname, '../exports');
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
+    }
+
+    const csvFilePath = path.join(exportDir, `agenda_${agendaId}.csv`);
+
+    const csvWriter = createCsvWriter({
+      path: csvFilePath,
+      header: [
+        { id: 'key', title: 'Key' },
+        { id: 'value', title: 'Value' },
+      ],
+    });
+
+    //boucle pour l agenda
+    const records = [
+      { key: 'Nom', value: agenda.nom },
+      { key: 'Description', value: agenda.description || '' },
+      { key: 'Date de Création', value: agenda.dateCreation.toISOString() },
+      { key: 'Participants', value: agenda.participants.join(', ') },
+      { key: 'Créateur Email', value: agenda.createurEmail },
+      { key: 'Couleur', value: agenda.couleur },
+    ];
+
+    //boucle pour les rdv
+    for (const rdvId of agenda.rendezVous) {
+      const rdv = await RendezVous.findById(rdvId);
+      if (rdv) {
+        records.push(
+            { key: 'RendezVous - Nom', value: rdv.nom },
+            { key: 'RendezVous - Description', value: rdv.description || '' },
+            { key: 'RendezVous - Date', value: rdv.dateRendezVous.toISOString() },
+            { key: 'RendezVous - Participants', value: rdv.participants.join(', ') },
+            { key: 'RendezVous - Durée', value: `${rdv.duree.heures}h ${rdv.duree.minutes}m` }
+        );
+      }
+    }
+
+    await csvWriter.writeRecords(records);
+    res.download(csvFilePath);
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
+
+
+exports.importAgenda = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send('No file uploaded.');
+    }
+
+    const filePath = req.file.path;
+    const agendaData = {};
+    const rendezVousData = [];
+
+    // Parse le CSV
+    fs.createReadStream(filePath)
+        .pipe(csvParser())
+        .on('data', (row) => {
+          if (row.Key === 'Nom') agendaData.nom = row.Value;
+          else if (row.Key === 'Description') agendaData.description = row.Value || '';
+          else if (row.Key === 'Participants') agendaData.participants = row.Value.split(',').map(p => p.trim());
+          else if (row.Key === 'Créateur Email') agendaData.createurEmail = row.Value;
+          else if (row.Key === 'Couleur') agendaData.couleur = parseInt(row.Value, 10);
+          else if (row.Key.startsWith('RendezVous')) {
+            const field = row.Key.split(' - ')[1];
+            if (!rendezVousData[rendezVousData.length - 1] || field === 'Nom') {
+              rendezVousData.push({});
+            }
+            const currentRdv = rendezVousData[rendezVousData.length - 1];
+            if (field === 'Nom') currentRdv.nom = row.Value;
+            if (field === 'Description') currentRdv.description = row.Value || '';
+            if (field === 'Date') currentRdv.dateRendezVous = new Date(row.Value);
+            if (field === 'Participants') {
+              currentRdv.participants = row.Value ? row.Value.split(',').map(p => p.trim()) : [];
+            }
+            if (field === 'Durée') {
+              const [heures, minutes] = row.Value.split('h').map(str => parseInt(str.trim(), 10));
+              currentRdv.duree = { heures, minutes };
+            }
+          }
+        })
+        .on('end', async () => {
+          const newAgenda = new Agenda(agendaData);
+          await newAgenda.save();
+
+          // ajoute les rdv a l agenda
+          for (const rdv of rendezVousData) {
+            console.log(rdv);
+            const newRdv = new RendezVous({
+              ...rdv,
+              agenda: newAgenda._id,
+              createurEmail: newAgenda.createurEmail, // Set creator's email from the agenda
+            });
+            await newRdv.save();
+
+            newAgenda.rendezVous.push(newRdv._id);
+          }
+          console.log('RendezVous Data:', rendezVousData);
+          await newAgenda.save();
+
+          fs.unlinkSync(filePath);
+
+          res.status(201).send('Agenda and rendezvous imported successfully!');
+        });
+  } catch (err) {
+    console.error(err);
+    next(err);
   }
 };
