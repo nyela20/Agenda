@@ -178,3 +178,76 @@ exports.forgotPassword = async (req , res) => {
   }
 }
 
+// affiche formulaire resetPassword
+exports.getResetPassword = async (req , res) =>{
+  try {
+    const user = await User.findOne({
+      resetPassWordToken : req.params.token,
+      resetPassWordExpires : {$gt : Date.now()}
+    });
+    if(!user || !req.params.token){
+      return res.render('reset-password',{
+        error : 'Le lien de réinitialisation est invalide ou a expiré.',
+        token: null,
+        linkExpired : true
+      });
+    }
+    res.render('reset-password' , {
+      error : null ,
+      token : req.params.token,
+      linkExpired : false
+    });
+    
+  } catch (error) {
+    res.render('reset-password', { error: err.message });
+  }
+}
+
+// traite le nouveau mot de passe 
+exports.postResetPassword = async (req , res ) =>{
+  try {
+
+    const password  = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+
+    if(password.length < 6 ){
+      return res.render('reset-password' , 
+        { 
+          error: 'Le mot de passe doit contenir au moins 6 caractères.' 
+
+        });
+    } 
+
+    if(password !==  confirmPassword ){
+      return res.render('reset-password' , 
+        { 
+          error: 'Les mots de passe ne correspondent pas.' 
+
+        });
+    }
+
+    const user = await User.findOne({
+      resetPassWordToken :  req.params.token,
+      resetPassWordExpires : {$gt: Date.now()}
+    });
+
+    if(!user){
+      return res.render('reset-password' , 
+        { 
+          error: 'Le token a expiré.' 
+
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    user.password =  hashedPassword ;
+    user.resetPassWordToken = undefined;
+    user.resetPassWordExpires = undefined;
+    await user.save();
+
+    res.redirect('/users/login');
+  } catch (error) {
+    res.render('reset-password', { error: err.message });
+  }
+}
+
