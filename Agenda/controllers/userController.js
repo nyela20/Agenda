@@ -2,6 +2,11 @@ const User = require('../models/user');
 const RendezVous = require('../models/rendezvous.js'); 
 const Agenda = require('../models/agenda.js'); 
 const bcrypt = require('bcrypt'); // pour le mot de passe hasher
+// pour reset password via mail
+const nodemailer = require('nodemailer');
+const crypto = require('crypto'); // token pour reset password
+const { error } = require('console');
+require('dotenv').config();
 
 const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
 
@@ -119,3 +124,57 @@ exports.updateUserByMail = async (req, res) => {
     res.status(500).send(err);
   }
 };
+
+const transporter = nodemailer.createTransport({
+  host : process.env.MAIL_HOST ,
+  port : process.env.MAIL_PORT,
+  auth:{
+    user: process.env.MAIL_USER, 
+    pass: process.env.MAIL_PASS
+  }
+});
+
+
+// mot de pass oblié
+exports.forgotPassword = async (req , res) => {
+  try {
+    const email = req.body.email;
+
+    // generer un token 
+    const token = crypto.randomBytes(32).toString('hex');
+
+    //chercher l'utilisateur et mettre à jour avec le token 
+    const user = await User.findOne({ email: email });
+    if(!user){
+      return res.render('forgot-password' ,{
+        error : 'Aucun compte associe à cette addresse mail.'
+      });
+    }
+
+    user.resetPassWordToken = token;
+    user.resetPassWordExpires =  Date.now() + ( 20 * 60 * 1000 ); // expirées dans 20 min
+    //save dans la base de données 
+    await user.save();
+    
+    
+    // envoye le mail
+    const resetURL = `http://localhost:3000/users/reset-password/${token}`;
+    const mailOption = {
+      to: user.email,
+      from : 'agenda support <support@agenda.com>',
+      subject: 'Réinitialisation mot de passe Agenda',
+      text: `Bonjour \n\nPour votre demande de réinitialisation de mot de passe, veuillez cliquer sur le lien suivant\n\n
+      ${resetURL}\n\n`
+    };
+
+    await transporter.sendMail(mailOption);
+    res.render('forgot-password', { 
+      error: 'Un email de réinitialisation a été envoyé à votre adresse.' 
+    });
+
+    
+  } catch (err) {
+    res.render('forgot-password', { error: err.message });
+  }
+}
+

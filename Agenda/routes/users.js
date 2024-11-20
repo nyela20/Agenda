@@ -34,4 +34,12 @@ router.post('/compte' , async function(req ,res){
     await userController.updateUserByMail(req,res);
 });
 
+//mot de pass oblié
+//affiche le formulaire
+router.get('/forgot-password' , async function(req ,res){
+    res.render('forgot-password', { error: null});
+});
+// traite  du formulaire
+router.post('/forgot-password',userController.forgotPassword);
+
 module.exports = router;
