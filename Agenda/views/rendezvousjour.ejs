@@ -31,7 +31,7 @@
                 <!-- tester ici pour afficher les parametres ? dans url -->
                 <!--<h3><%=//"test " + JSON.stringify(req.query) %></h3> -->
 
-                <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>" >
+                <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour" >
 
                     <!-- Ne pas changer la date si on soumet ce formulaire -->
                     <input type="hidden" name="semaine" value="<%= semaine %>" />
@@ -50,6 +50,8 @@
                         });
                     %>
                     <br>
+                    <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
+                    <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
                     <button type="submit"> Mettre à jour affichage </button>
                 </form>
 
@@ -58,6 +60,25 @@
                     <button type="submit"> Aller à </button>
                 </form>
             </div>
+            <hr>
+        </div>
+
+        <div>
+            <h4> Rechercher/Filter les rendez-vous</h4>
+                <form id="agendafiltreForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
+                    <!-- Ne pas changer la date si on soumet ce formulaire -->
+                    <input type="hidden" name="semaine" value="<%= semaine %>" />
+                    <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                    <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+                    <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                    <label for="nomFiltre"> Nom : </label>
+                    <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
+                    <br><br>
+                    <label for="emailFiltre"> Créateur : </label>
+                    <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>"> 
+                    <br><br>
+                    <button type="submit"> Appliquer </button>
+                </form>
             <hr>
         </div>
 
@@ -103,6 +124,8 @@
                 <input type="hidden" name="anneeParametre" value="<%= anneePrecedent %>" />
                 <input type="hidden" name="numJourActuel" value="<%= numJourPrecedent%>"/>
                 <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
+                <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>   
                 <button type="submit">Jour Précédent</button>
             </form>
 
@@ -160,6 +183,8 @@
                 <input type="hidden" name="anneeParametre" value="<%= anneeSuivant %>" />
                 <input type="hidden" name="numJourActuel" value="<%= numJourSuivant%>"/>
                 <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
+                <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>   
                 <button type="submit">Jour Suivant</button>
             </form>
         </div>
@@ -207,7 +232,9 @@
                                                                                 
                                         <% if(numJourActuel == rendezvous.dateRendezVous.getDate()){
                                             if(hour == rendezvous.dateRendezVous.getHours()){ %>
-                                                <div style="cursor: pointer;"
+                                                <% let tailleRdvCell = -105 * (rendezvous.duree.heures-1) %>
+                                                <% let margeminutes = Math.floor((rendezvous.dateRendezVous.getMinutes() * 100) / 60) %>
+                                                <div style="cursor: pointer; margin-bottom:<%=tailleRdvCell%>px; top: <%=margeminutes%>px"
                                                     class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
                                                     onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
                                                     <%="Nom :" +  rendezvous.nom%>
