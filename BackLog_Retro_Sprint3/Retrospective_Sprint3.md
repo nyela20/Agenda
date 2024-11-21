@@ -13,8 +13,8 @@
 
 ### Fonctionnalités réalisées :
 - **Naviguer dans l’agenda** (jour, semaine, mois) - *(GEORGES Valerian)* - **FAIT**
-- **Exporter un agenda** (fichier Excel ou JSON) - *(COISPINE Pierre)* - **FAIT**
-- **Importer un agenda** (fichier Excel ou JSON) - *(COISPINE Pierre)* - **FAIT**
+- **Exporter un agenda** (fichier .csv) - *(COISPINE Pierre)* - **FAIT**
+- **Importer un agenda** (fichier .csv) - *(COISPINE Pierre)* - **FAIT**
 - **Mot de passe oublié** (avec envoi de mail) - *(ALTAWEEL Mohamad)* - **FAIT**
 - **Rechercher rendez-vous** (nom, créateur) - *(RALANTONISAINANA Ny Elanirina)* - **FAIT**
 - **Ajouter un système de notifications** - *(ABHAJ Zouhir)* :
