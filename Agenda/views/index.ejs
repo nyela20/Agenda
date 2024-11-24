@@ -7,17 +7,22 @@
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
-    <div class="container-home-page">
-        <h1><%= title %></h1>
-        <p>Welcome to <%= title %></p>
-    </div>
-    <div>
-        <form action="/users/login" method="GET">
-            <button type="submit">Se connecter</button>
-        </form>
-        <form action="/users/register" method="GET">
-            <button type="submit">Créer un compte</button>
-        </form>
+    <div style="display: contents; gap: 50px; display: inline-grid; gap: 100px;">
+        <div>
+            <h1 style="color:white; font-family: sans-serif;">
+                "Organisez votre vie facilement : des agendas sur mesure, créés juste pour vous, avec notre application Agenda"
+            </h1>
+        </div>
+        <div class="container-home-page" style="place-self: center;">
+            <h1><%= title %></h1>
+            <p>Welcome to <%= title %></p>
+            <form action="/users/login" method="GET">
+                <button type="submit">Se connecter</button>
+            </form>
+            <form action="/users/register" method="GET">
+                <button type="submit">Créer un compte</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>

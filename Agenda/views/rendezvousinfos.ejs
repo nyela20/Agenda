@@ -2,11 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../../../stylesheets/styleRegister.css">
     <title><%= title %></title>
 </head>
 <body>
+    <div class="container">
     <h1><%= title %></h1>
+    <h5 style="place-self: center;">(Crée par <%= rendezvous.createurEmail %>)</h5>
     <form id="modifierRendezVousForm" action="/rendezvous/<%=agendaId%>/modifier/<%=rendezvous.id%>" method="POST">
 
         <label for="nom">Nom du rendez-vous : </label>
@@ -28,13 +30,13 @@
         <label for="dureeMinutes">(minutes) :</label>
         <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="<%=rendezvous.duree.minutes%>" required>
 
-        <label for="couleur" hidden>Couleur :</label>
         <input id="couleur" type="number" name="couleur" value="<%=rendezvous.couleur%>" hidden>     </select>
         <br><br>
         
         <div>
             <button>Appliquer les modifications</button>
         </div>
+        <br>
     </form>
 
     <!-- <% if (rendezvous.estRecurrent) { %>
@@ -47,11 +49,13 @@
     <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rendezvous.id%>" method="POST">
             <button>Supprimer le Rendez-Vous</button>
     </form>
+    <br>
     <form action="/rendezvous/<%=agendaId%>/accepter/<%= rendezvous.id %>" method="POST">
-        <button>Accepter le Rendez-vous</button>
+        <button>Participer à ce rendez-vous</button>
     </form>
+    <br>
     <form action="/rendezvous/<%=agendaId%>/refuser/<%= rendezvous.id %>" method="POST">
-        <button>Refuser le Rendez-Vous</button>
+        <button>Ne pas participer à ce Rendez-Vous</button>
     </form>
 
     
@@ -60,6 +64,7 @@
 
     <div id="error-message" style="color: red; display: none;">
         La durée du rendez-vous doit être d'au moins 30 minutes.
+    </div>
     </div>
     
     <script>

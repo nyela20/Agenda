@@ -7,81 +7,96 @@
     <title><%= mois + " " + date.getFullYear() %></title>
 </head>
 <body>
-
-    <div class="calendar-container">
-        <div class="calendar-header">
-            <div>
-                <h1><%= mois + " " + date.getFullYear() %></h1>
-                <h3>Nom : <%= agenda.nom %> </h3>
-                <h4>Description : <%= agenda.description %> </h4>
-                <h4>Créateur de cet agenda : <%= agenda.createurEmail %> </h4>
-                <div class="view-switch">
-                    <form action="/agenda" method ="GET">
-                        <button>Page Principale</button>
-                    </form>
-                    <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
-                        <button>Créer un rendez-vous</button>
-                    </form>
+    <div>
+        <header class="header">
+            <ul class="menu">
+                <div class="agenda">
                 </div>
-            </div>
-            <hr>
+                <div class="info">
+                    <li><h2>Nom de l'agenda : <%= agenda.nom %></h2></li>
+                    <li><h4>Description : <%= agenda.description %></h4></li>
+                    <li><h4>Créateur de cet agenda : <%= agenda.createurEmail %></h4></li>
+                </div>
+            </ul>
+        </header>
+    </div>
+    <hr>
+    <div class="rendezvous">
+        <div class="up-mes-agendas">
             <div>
-                <h4> Afficher les autres agendas</h4>
-
-                <!-- tester ici pour afficher les parametres ? dans url -->
-                <!--<h3><%=//"test " + JSON.stringify(req.query) %></h3> -->
-
-                <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour" >
-
-                    <!-- Ne pas changer la date si on soumet ce formulaire -->
-                    <input type="hidden" name="semaine" value="<%= semaine %>" />
-                    <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
-                    <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
-
+                <h4> Rechercher/Filter les rendez-vous</h4>
+                    <form id="agendafiltreForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
+                        <!-- Ne pas changer la date si on soumet ce formulaire -->
+                        <input type="hidden" name="semaine" value="<%= semaine %>" />
+                        <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                        <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+                        <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
+                        <label for="nomFiltre"> Nom : </label>
+                        <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
+                        <br><br>
+                        <label for="emailFiltre"> Créateur : </label>
+                        <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>"> 
+                        <br><br>
+                        <button type="submit"> Appliquer </button>
+                    </form>
+                <hr>
+            </div>
+            <form id="checkboxForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour" >
+                <!-- Ne pas changer la date si on soumet ce formulaire -->
+                <input type="hidden" name="semaine" value="<%= semaine %>" />
+                <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+                <h4> Mes agendas </h4>
+                <div class="mes-agendas">
                     <%
                     // Parcours la liste des agendas dans la bdd
                     agendas.forEach(agendaElement => {
                         if(!(agendaElement.id == agenda.id)){ %>
-                            <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
-                            <input type="checkbox" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
+                            <input type="checkbox" class="checkbox-couleur-<%=agendaElement.couleur%>" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
                             <% if(req.query[agendaElement.nom]){ %> checked <%} %> >
+                            <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
                             <br>
                         <%}
                         });
                     %>
-                    <br>
-                    <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
-                    <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
-                    <button type="submit"> Mettre à jour affichage </button>
-                </form>
-
-                <form id="chooseDayDate" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
-                    <input type="date" name="dayDate" id="chooseDayDateInput" required>
-                    <button type="submit"> Aller à </button>
-                </form>
-            </div>
+                </div>
+                <h4> Agendas partagés avec moi </h4>
+                    <div class="mes-agendas">
+                        <%
+                        // Parcours la liste des agendas dans la bdd
+                        agendasPartages.forEach(agendaElement => {
+                            if(!(agendaElement.id == agenda.id)){ %>
+                                <input type="checkbox" class="checkbox-couleur-<%=agendaElement.couleur%>" value="<%=agendaElement.id%>" id="<%=agendaElement.nom%>" name="<%=agendaElement.nom%>"
+                                <% if(req.query[agendaElement.nom]){ %> checked <%} %> >
+                                <label for="<%=agendaElement.nom%>" ><%=agendaElement.nom%></label>
+                                <br>
+                            <%}
+                            });
+                        %>
+                    </div>
+                <br>
+                <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
+                <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
+                <button type="submit"> Mettre à jour affichage </button>
+            </form>
             <hr>
         </div>
-
-        <div>
-            <h4> Rechercher/Filter les rendez-vous</h4>
-                <form id="agendafiltreForm" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
-                    <!-- Ne pas changer la date si on soumet ce formulaire -->
-                    <input type="hidden" name="semaine" value="<%= semaine %>" />
-                    <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
-                    <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
-                    <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
-                    <label for="nomFiltre"> Nom : </label>
-                    <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
-                    <br><br>
-                    <label for="emailFiltre"> Créateur : </label>
-                    <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>"> 
-                    <br><br>
-                    <button type="submit"> Appliquer </button>
-                </form>
-            <hr>
-        </div>
-
+        <div class="right-rendezvous">
+            <div class="header-right-rednez-vous">
+                <h1><%= mois + " " + date.getFullYear() %></h1>
+                <div class="action-rendez-vous">
+                    <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
+                        <button>Ajouter un rendez-vous</button>
+                    </form>
+                    <form id="chooseDayDate" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
+                        <input type="date" name="dayDate" id="chooseDayDateInput" required>
+                        <button type="submit"> Changer de jour </button>
+                    </form>
+                    <form action="/agenda" method ="GET">
+                        <button>Fermer cet agenda</button>
+                    </form>
+                </div>
+            <br>
         <!-- Navigation des semaines/mois/annee -->
         <div class="nav-buttons">
             <%
@@ -126,7 +141,7 @@
                 <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
                 <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
                 <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
-                <button type="submit">Jour Précédent</button>
+                <button class="nav" type="submit">Jour Précédent</button>
             </form>
 
             <form id="hebdomadaire" method="GET" action="/rendezvous/<%=agenda.id%>" >
@@ -134,12 +149,12 @@
                 <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
                 <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
                 <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
-                <button type="submit">Vue Hebdomadaire</button>
+                <button class="nav" type="submit">Vue Hebdomadaire</button>
             </form>
 
             <form id="mois" method="GET" action="/rendezvous/<%=agenda.id%>/mois">
                 <input type="hidden" name="jourParametre2" value ="<%=caseDepart%>"/>
-                <button type="submit">Vue Mensuelle</button>
+                <button class="nav" type="submit">Vue Mensuelle</button>
             </form>
 
             <%
@@ -185,10 +200,10 @@
                 <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
                 <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
                 <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>    
-                <button type="submit">Jour Suivant</button>
+                <button class="nav" type="submit">Jour Suivant</button>
             </form>
+            </div>
         </div>
-
         <div class="calendar-grid">
             <%let journom;
             switch (jourParametre2){
@@ -215,7 +230,7 @@
                     break
             }
             %>
-            <div class="day-label">Horaires</div>
+            <div class="day-label">Horaires (GMT+01)</div>
             <div class="day-label"><%=journom%></div>
 
             <!-- Les horaires de 00h à 23h -->
@@ -228,8 +243,7 @@
                                 <% 
                                 // Parcours la liste des rendez-vous et affiche leurs attributs
                                 rendezVousList.forEach(rendezvous => { 
-                                    %>
-                                                                                
+                                    %>                                                          
                                         <% if(numJourActuel == rendezvous.dateRendezVous.getDate()){
                                             if(hour == rendezvous.dateRendezVous.getHours()){ %>
                                                 <% let tailleRdvCell = -105 * (rendezvous.duree.heures-1) %>
@@ -238,8 +252,6 @@
                                                     class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
                                                     onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
                                                     <%="Nom :" +  rendezvous.nom%>
-                                                    <br>
-                                                    <%="Créateur : " + rendezvous.createurEmail%>
                                                     <br>
                                                     <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%>
                                                     <br>
@@ -264,9 +276,8 @@
                 %>
             <% 
             %>
+            </div>
         </div>
     </div>
-    <script>
-    </script>
 </body>
 </html>

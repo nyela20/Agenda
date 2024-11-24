@@ -2,103 +2,125 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
-    <title>Page Principale</title>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylePagePrincipale.css">
+    <title>Menu Principale</title>
 </head>
 <body>
-    <h1>Page Principale</h1>
-    <h2>Votre session : <%= userEmailConnected %></h2>
+    <header class="header">
+        <ul class="menu">
+            <div class="agenda">
+                <h1>Agenda</h1>
+            </div>
+            <div class="compte">
+                <li><h2><%= userEmailConnected %></h2></li>
+                <li>
+                    <form action = "/users/compte" method="GET">
+                        <button type="submit"> Modifier votre compte </button>
+                    </form>
+                </li>
+                <li>                 
+                    <form id="logoutForm" action="/users/logout" method="GET">
+                        <button type="submit" id="logoutBtn">Déconnexion</button>
+                    </form>
+                </li>
+            </div>
+        </ul>
+    </header>
 
-    <div>
-        <form action="/agenda/creer" method="GET">
-            <button type="submit">Ajouter un agenda</button>
-        </form>
-        <form action = "/users/compte" method="GET">
-            <button type="submit"> Modifier votre compte </button>
-        </form>
-    </div>
+    <hr>
 
-    <h2>Mes Agendas</h2>
-    <div class="agenda-section">
-        <% if (agendasCrees.length > 0) { %>
-            <ul>
-                <% agendasCrees.forEach(agenda => { %>
-                    <li>
-                        <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
-                        <strong>Description :</strong> <%= agenda.description %><br>
-                        <strong>Email du créateur :</strong> <%= agenda.createurEmail %><br>
-                        
-                        <!-- Formulaire de partage -->
-                        <div class="partage-form">
-                            <form action="/agenda/<%= agenda.id %>/partager" method="POST">
-                                <input type="email" name="emailPartage" placeholder="Email de l'utilisateur" required>
-                                <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
-                                <button type="submit">Partager</button>
-                            </form>
+    <div class="all-agenda">
+        <div class="agenda-section">
+            <div class="mes-agendas">
+                <h2 class="mesagendas">Mes Agendas</h2>
+                    <form action="/agenda/creer" method="GET">
+                        <button class="ajouter-bouton" type="submit">Ajouter un agenda</button>
+                    </form>
+            </div>
+            <% if (agendasCrees.length > 0) { %>
+                <ul class="agendaListUL">
+                    <% agendasCrees.forEach(agenda => { %>
+                        <li class="agendaList">
+                            <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
+                            <strong>Description :</strong> <%= agenda.description %><br>
+                            <!--<strong>Email du créateur :</strong> <%= //agenda.createurEmail %><br>-->
                             
-                            <!-- Liste des partages -->
-                            <% if(agenda.partages && agenda.partages.length > 0) { %>
-                                <h4>Partagé avec :</h4>
-                                <ul>
-                                    <% agenda.partages.forEach(partage => { %>
-                                        <li>
-                                            <%= partage.email %>
-                                            <form action="/agenda/<%= agenda.id %>/annuler-partage" method="POST" style="display: inline;">
-                                                <input type="hidden" name="emailPartage" value="<%= partage.email %>">
-                                                <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
-                                                <button type="submit">Annuler le partage</button>
-                                            </form>
-                                        </li>
-                                    <% }) %>
-                                </ul>
-                            <% } %>
-                        </div>
-                        <div>
-                            <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                                <button>Voir</button>
-                            </form>
-                            <form action="/agenda/<%= agenda.id %>/modifier" method="GET">
-                                <button>Modifier</button>
-                            </form>
-                            <form action="/agenda/supprimer/<%= agenda._id %>" method="GET">
-                                <button>Supprimer</button>
-                            </form>
-                            <form action="/agenda/export/<%= agenda._id %>" method="GET">
-                                <button>Exporter</button>
-                            </form>
-                        </div>
-                        <hr>
-                    </li>
-                <% }) %>
-            </ul>
-        <% } %>
-    </div>
+                            <!-- Formulaire de partage -->
+                            <div class="partage-form">
+                                <form action="/agenda/<%= agenda.id %>/partager" method="POST">
+                                    <input type="email" name="emailPartage" placeholder="Email de l'utilisateur" required>
+                                    <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
+                                    <button type="submit">Partager</button>
+                                </form>
+                                <br>
+                                <div class="buttonaction">
+                                    <form action="/rendezvous/<%= agenda.id %>" method="GET">
+                                        <button>Voir</button>
+                                    </form>
+                                    <form action="/agenda/<%= agenda.id %>/modifier" method="GET">
+                                        <button>Modifier</button>
+                                    </form>
+                                    <form action="/agenda/supprimer/<%= agenda._id %>" method="GET">
+                                        <button>Supprimer</button>
+                                    </form>
+                                    <form action="/agenda/export/<%= agenda._id %>" method="GET">
+                                        <button>Exporter</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Liste des partages -->
+                                <% if(agenda.partages && agenda.partages.length > 0) { %>
+                                    <h4>Partagé avec :</h4>
+                                    <div class="partager-avec">
+                                        <ul>
+                                            <% agenda.partages.forEach(partage => { %>
+                                                <div>
+                                                <li>
+                                                    <div>
+                                                        <%= partage.email %>
+                                                    </div>
+                                                    <div>
+                                                    <form action="/agenda/<%= agenda.id %>/annuler-partage" method="POST">
+                                                        <input type="hidden" name="emailPartage" value="<%= partage.email %>">
+                                                        <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
+                                                        <button type="submit">Annuler le partage</button>
+                                                    </form>
+                                                    <div>
+                                                </li>
+                                                <div>
+                                            <% }) %>
+                                        </ul>
+                                    </div>
+                                <% } %>
+                            </div>
 
-    <h2>Agendas partagés avec moi</h2>
-    <div class="agenda-section">
-        <% if (agendasPartages.length > 0) { %>
-            <ul>
-                <% agendasPartages.forEach(agenda => { %>
-                    <li>
-                        <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
-                        <strong>Description :</strong> <%= agenda.description %><br>
-                        <strong>Créateur :</strong> <%= agenda.createurEmail %><br>
-                        <div class="bouton-agenda-action">
-                            <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                                <button>Voir</button>
-                            </form>
-                        </div>
-                        <hr>
-                    </li>
-                <% }) %>
-            </ul>
-        <% } else { %>
-            <p>Aucun agenda partagé.</p>
-        <% } %>
-    </div>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
+        </div>
 
-    <form id="logoutForm" action="/users/logout" method="GET">
-        <button type="submit" id="logoutBtn">Déconnexion</button>
-    </form>
+        <div class="agenda-partage-section">
+            <h2>Agendas partagés avec moi</h2>
+            <% if (agendasPartages.length > 0) { %>
+                <ul class="agendaListUL">
+                    <% agendasPartages.forEach(agenda => { %>
+                        <li class="agendaList">
+                            <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
+                            <strong>Description :</strong> <%= agenda.description %><br>
+                            <strong>Créateur :</strong> <%= agenda.createurEmail %><br>
+                            <div class="bouton-agenda-action">
+                                <form action="/rendezvous/<%= agenda.id %>" method="GET">
+                                    <button>Voir</button>
+                                </form>
+                            </div>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } else { %>
+                <p>Aucun agenda partagé.</p>
+            <% } %>
+        </div>
+    </div>
 </body>
 </html>

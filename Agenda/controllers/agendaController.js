@@ -285,7 +285,7 @@ exports.importAgenda = async (req, res, next) => {
 
           // ajoute les rdv a l agenda
           for (const rdv of rendezVousData) {
-            console.log(rdv);
+            //console.log(rdv);
             const newRdv = new RendezVous({
               ...rdv,
               agenda: newAgenda._id,
@@ -307,3 +307,16 @@ exports.importAgenda = async (req, res, next) => {
     next(err);
   }
 };
+
+// getAgenda
+exports.getAgenda = async (req, res, next, agendaId) => {
+  try{
+    const agenda = await Agenda.findById(agendaId);
+    if (!agenda) {
+      return res.status(404).json({ message: 'Agenda non trouvé' });
+    }
+    return agenda;
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur agenda inexistant', error: error.message });
+  }
+}

@@ -2,10 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleRegister.css">
     <title><%= title %></title>
 </head>
 <body>
+    <div class="container">
     <h1><%= title %></h1>
     <form id="createrendezvous" action="/rendezvous/<%= agendaId %>/creer" method="POST">
         <label for="nom">Nom du rendez-vous :</label>
@@ -56,6 +57,7 @@
 
     <div id="error-message" style="color: red; display: none;">
         La durée du rendez-vous doit être d'au moins 30 minutes.
+    </div>
     </div>
 
     <script>

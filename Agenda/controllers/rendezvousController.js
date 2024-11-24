@@ -307,17 +307,26 @@ exports.afficherRendezVousJour = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
-    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
-
+    const userConnected = localStorage.getItem("userEmail");
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
 
+    const agendasPartages = await Agenda.find({
+      "partages.email": userConnected
+    });
+
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
     let agendaIds = [agendaId]
     agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
+
+    agendasPartages.forEach(agenda => {
       if(req.query[agenda.nom]){
         agendaIds.push(agenda.id)
       }
@@ -457,7 +466,7 @@ exports.afficherRendezVousJour = async (req, res) => {
       }
     }
 
-    res.render('rendezvousjour', {nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
+    res.render('rendezvousjour', {agendasPartages, nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
