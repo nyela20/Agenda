@@ -28,10 +28,11 @@
         <input name="createurEmail" value="<%= userEmailConnected %>" style="visibility: hidden;" readonly required> <br>
 
         <!-- Nouveaux champs pour la récurrence -->
-        <div class="form-group">
-            <label for="estRecurrent">Rendez-vous récurrent :</label>
+        <div class="all_recurence_2">
             <input type="checkbox" id="estRecurrent" name="estRecurrent">
+            <label class="all_recurence_label" for="estRecurrent">Rendez-vous récurrent :</label>
         </div>
+        <br>
         
         <div class="form-group" id="optionsRecurrence">
             <label for="typeRecurrence">Type de récurrence :</label>
@@ -41,6 +42,7 @@
                 <option value="semaine">Chaque semaine</option>
                 <option value="mensuel">Chaque mois</option>
             </select>
+            <br><br>
         
             <div class="form-group">
                 <label for="finRecurrence">Date de fin de récurrence :</label>

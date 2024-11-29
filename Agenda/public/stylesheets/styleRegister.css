@@ -29,6 +29,20 @@ form {
     flex-direction: column;
 }
 
+.all_recurence{
+    display: flex;
+}
+
+.all_recurence_2{
+    display: flex;   
+    margin-top: -17%;
+}
+
+.all_recurence_label{
+    margin-bottom: 0px;
+    margin-left: 2%;
+}
+
 .form-group {
     margin-bottom: 15px;
 }

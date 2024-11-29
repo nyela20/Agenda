@@ -22,11 +22,14 @@ router.get('/:agendaId/informations/:rendezvousId', async function(req, res, nex
     const agendaId = req.params.agendaId; // récupérer l'ID de l'agenda
     const rendezvous = await rendezVousController.getRendezVousById(req, res, next);
     const dateRendezVous = new Date(rendezvous.dateRendezVous);
-    dateRendezVous.setHours(dateRendezVous.getHours() + 1); // Heure d'ete 
+    dateRendezVous.setHours(dateRendezVous.getHours() + 1); // Heure d'hiver 
     const dateRendezVousFormatted = dateRendezVous.toISOString().slice(0, 16);  // Récupère YYYY-MM-DDTHH:MM
+    const dateRendezVousFin = new Date(rendezvous.finRecurrence);
+    dateRendezVousFin.setHours(dateRendezVous.getHours() + 1); // Heure d'hiver 
+    const dateRendezVousFormattedFin = dateRendezVousFin.toISOString().slice(0, 16);  // Récupère YYYY-MM-DDTHH:MM
     res.render('rendezvousinfos', 
         { title: 'Informations sur le Rendez-vous', 
-            rendezvous, dateRendezVousFormatted,  
+            rendezvous, dateRendezVousFormatted,  dateRendezVousFormattedFin,
             agendaId, 
             userEmailConnected: localStorage.getItem("userEmail") });
 });
