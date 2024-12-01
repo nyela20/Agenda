@@ -255,3 +255,44 @@ exports.postResetPassword = async (req , res ) =>{
   }
 }
 
+exports.bloquerEmailUtilisateur = async (req , res) =>{
+  try {
+
+    let noninsert = [];
+    const email = localStorage.getItem("userEmail");
+    userData = await User.findOne({"email" : email });
+
+    const emails = req.body.emails;
+
+    const emailsRegex = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4},)+/;
+
+    emails2 = emails.split(",");
+    userData = await User.findOne({"email" : email });
+
+    for(let i = 0; i < emails2.length;i++){
+
+      let user = await User.findOne({"email" : emails2[i] });
+      console.log(user);
+
+      let nbreturn = await User.findOne({"email" : emails2[i] }).count();
+      console.log(nbreturn);
+    
+      if(nbreturn > 0 && emailsRegex.test(emails2[i]) && !userData.blocked.includes(emails2[i])){
+        console.log(emails2[i]);
+        await User.updateOne({"email":email},{$push:{"blocked":emails2[i]}});
+      }else{
+          console.log("lol emails2");
+          noninsert.push(emails2[i]);
+      }
+    }
+
+    res.render('compte' , {title : 'Votre compte', userData});
+    console.log("après render");
+    
+  } catch (err) {
+    console.log("avant res status");
+    res.status(500).send(err);
+    res.render('compte' , {title : 'Votre compte', userData, noninsert});
+  }
+}
+
