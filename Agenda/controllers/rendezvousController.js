@@ -295,7 +295,7 @@ exports.afficherRendezVous = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = (temp != undefined) ? nbsemaine : parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezvous', {nomFiltre, emailFiltre, emailFiltre, nomFiltre, req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
+    res.render('rendezvous', {emailFiltre, nomFiltre, req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
@@ -307,17 +307,26 @@ exports.afficherRendezVousJour = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
-    //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
-
+    const userConnected = localStorage.getItem("userEmail");
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
 
+    const agendasPartages = await Agenda.find({
+      "partages.email": userConnected
+    });
+
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
     let agendaIds = [agendaId]
     agendas.forEach(agenda => {
+      if(req.query[agenda.nom]){
+        agendaIds.push(agenda.id)
+      }
+    });
+
+    agendasPartages.forEach(agenda => {
       if(req.query[agenda.nom]){
         agendaIds.push(agenda.id)
       }
@@ -457,7 +466,7 @@ exports.afficherRendezVousJour = async (req, res) => {
       }
     }
 
-    res.render('rendezvousjour', {nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
+    res.render('rendezvousjour', {agendasPartages, nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
 
   } catch (error) {
     res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
@@ -499,14 +508,12 @@ exports.afficherRendezVousMois = async (req, res) => {
     const dateActuelle = new Date();
 
     let temp = req.query.monthDate;
-    console.log(temp);
 
     let moisParametre;
     let anneeParametre;
 
     if(temp != undefined){
       valeurs = temp.split('-');
-      console.log(valeurs);
       anneeParametre = parseInt(valeurs[0]);
       moisParametre = (parseInt(valeurs[1]) - 1);
     }else{
@@ -615,8 +622,32 @@ exports.afficherRendezVousMois = async (req, res) => {
 exports.supprimerRendezVous = async (req, res) => {
   try{
   
-    await RendezVous.findByIdAndDelete(req.params.rendezvousId);
-  
+    if (req.body.recurrence) {
+      const rendezVous = await RendezVous.findById(req.params.rendezvousId);
+
+      if (!rendezVous) {
+        return res.status(404).send('Rendez-vous non trouvé');
+      }
+
+      const dateCreationStart = new Date(
+        Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000
+      );
+      const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
+
+      // suppression avec recurrence
+      await RendezVous.deleteMany({
+        dateCreation: {
+          $gte: dateCreationStart,
+          $lt: dateCreationEnd    
+        },
+        agenda: rendezVous.agenda
+      });
+    
+    } else {
+      //suppression seule
+      await RendezVous.findByIdAndDelete(req.params.rendezvousId);
+    }
+
     res.redirect('/rendezvous/' + req.params.agendaId);
 
   } catch (error) {
@@ -625,43 +656,101 @@ exports.supprimerRendezVous = async (req, res) => {
 
 };
 
-//acepter/refuser rdv
-
+// modifier pour accepter les rendezvous recurrents
 exports.accepterRendezVous = async (req, res, next) => {
   try {
     const rendezvousId = req.params.rendezvousId;
-    const rendezvous = await this.getRendezVousById(rendezvousId);
+    const agendaId = req.params.agendaId;
+    const rendezvous = await RendezVous.findById(rendezvousId);
+    const userConnected = localStorage.getItem("userEmail");
 
-    if (!rendezvous) {
-      return next(createError(404, 'Rendez-vous non trouvé'));
+     // mis a jour de tout les rdvs recurrents
+     if(req.body.recurrence){
+      
+      // récupere tous les rdvs recurrent associe
+      const dateCreationStart = new Date(
+        Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000
+      );
+      const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
+
+      const allredvrec = await RendezVous.find({
+        dateCreation: {
+          $gte: dateCreationStart,
+          $lt: dateCreationEnd
+        },
+        agenda: rendezvous.agenda
+      });
+      
+      const allRdvIds = allredvrec.map(rdv => rdv._id);
+      
+      await RendezVous.updateMany(
+        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
+        {  $set: {  refuse : false, accepte : true },
+          $addToSet : { participants : userConnected}
+        }
+      );
+
+    }else{
+      // mis a jour de rdv un seul
+      await RendezVous.updateOne(
+        { _id: rendezvous._id }, 
+        {  $set: {  refuse : false, accepte : true },
+        $addToSet : { participants : userConnected}
+        }
+      );
     }
 
-    rendezvous.accepte = true;
-    rendezvous.refuse = false;
-    await rendezvous.save();
-
-    res.redirect(`/rendezvous/${rendezvousId}`);
+    res.redirect(`/rendezvous/${agendaId}/informations/${rendezvousId}`);
   } catch (error) {
-    next(createError(500, 'Erreur lors de l\'acceptation du rendez-vous'));
+    res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
   }
 };
 
 exports.refuserRendezVous = async (req, res, next) => {
   try {
     const rendezvousId = req.params.rendezvousId;
-    const rendezvous = await this.getRendezVousById(rendezvousId);
+    const agendaId = req.params.agendaId;
+    const rendezvous = await RendezVous.findById(rendezvousId);
+    const userConnected = localStorage.getItem("userEmail");
 
-    if (!rendezvous) {
-      return next(createError(404, 'Rendez-vous non trouvé'));
+    // mis a jour de tout les rdvs recurrents
+    if(req.body.recurrence){
+      
+      // récupere tous les rdvs recurrent associe
+      const dateCreationStart = new Date(
+        Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000
+      );
+      const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
+
+      const allredvrec = await RendezVous.find({
+        dateCreation: {
+          $gte: dateCreationStart,
+          $lt: dateCreationEnd
+        },
+        agenda: rendezvous.agenda
+      });
+      
+      const allRdvIds = allredvrec.map(rdv => rdv._id);
+      
+      await RendezVous.updateMany(
+        { _id: { $in: allRdvIds } }, 
+        {  $set: {  refuse : true, accepte : false },
+           $pull: { participants: userConnected }
+        }
+      );
+
+    }else{
+      // mis a jour de un seul
+      await RendezVous.updateOne(
+        { _id: rendezvous._id }, 
+        {  $set: {  refuse : true, accepte : false },
+           $pull: { participants: userConnected }
+        }
+      );
     }
-
-    rendezvous.refuse = true;
-    rendezvous.accepte = false;
-    await rendezvous.save();
-
-    res.redirect(`/rendezvous/${rendezvousId}`);
+    res.redirect(`/rendezvous/${agendaId}/informations/${rendezvousId}`);
   } catch (error) {
-    next(createError(500, 'Erreur lors du refus du rendez-vous'));
+    res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
   }
 };
 
@@ -689,68 +778,101 @@ exports.getRendezVousById = async (req) => {
 // fonction pour modifier un rendez-vous
 exports.modifierRendezVous = async (req, res) => {
   try {
-    const { nom, couleur, description,
-          dateRendezVous, participants, createurEmail, dureeHeures,
-          dureeMinutes,
-          //param pour modifier un rdv recurrent
-          modifierTousLesRecurrents
-        } = req.body;
+    const { 
+      nom, 
+      couleur, 
+      description,
+      dateRendezVous, 
+      dureeHeures,
+      dureeMinutes, 
+      typeRecurrence, 
+      finRecurrence,
+      recurrence
+    } = req.body;
 
-    // const rendezVous = await RendezVous.findById(req.params.rendezVousId);
     const rendezVous = await RendezVous.findById(req.params.rendezvousId);
     if (!rendezVous) {
       return res.status(404).json({ message: 'Rendez-vous non trouvé' });
     }
 
-    
-      // construction dynamique des champs à mettre à jour
-      const champsModifies = {
-        ...(nom && { nom }),
-        ...(couleur && { couleur }),
-        ...(description && { description }),
-        ...(dateRendezVous && { dateRendezVous }),
-        ...(participants && { participants }),
-        ...(createurEmail && { createurEmail }),
-        ...(dureeHeures || dureeMinutes) && {
-          duree: {
-            heures: dureeHeures || 0,
-            minutes: dureeMinutes || 0
-          }
-        }
-      };
+    // modification par récurrence
+    if(recurrence){
 
-    if(rendezVous.estRecurrent ){
-      // modifier tous les rdvs recu à partir de la date actuelle
-      await RendezVous.updateMany(
-        {
-          agenda: rendezVous.agenda,
-          estRecurrent: true,
-          typeRecurrence: rendezVous.typeRecurrence,
-          dateRendezVous: { $gte: rendezVous.dateRendezVous },
-          finRecurrence: rendezVous.finRecurrence
+      // récupere tous les rdvs recurrent associe
+      const dateCreationStart = new Date(
+        Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000
+      );
+      const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
+
+      const allredvrec = await RendezVous.find({
+        dateCreation: {
+          $gte: dateCreationStart,
+          $lt: dateCreationEnd
         },
-        {
+        agenda: rendezVous.agenda
+      });
+      
+      // Extraire les IDs des rendez-vous pour les utiliser dans le filtre de `updateMany`
+      const allRdvIds = allredvrec.map(rdv => rdv._id);
+      
+      // Modification des champs nom, description, durée heure, durée minutes
+      await RendezVous.updateMany(
+        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
+        { 
           $set: {
-            nom: champsModifies.nom,
-            couleur: champsModifies.couleur,
-            description: champsModifies.description,
-            participants: champsModifies.participants,
-            duree: champsModifies.duree
+            nom: nom || rendezVous.nom,
+            description: description || rendezVous.description,
+            duree: {
+              heures: dureeHeures || rendezVous.duree.heures,
+              minutes: dureeMinutes || rendezVous.duree.minutes
+            },
+            couleur: couleur || rendezVous.couleur,
           }
         }
       );
-    } else {
-      // Mettre à jour le rendez-vous
-      const rendezVousMisAJour = await RendezVous.findByIdAndUpdate(
-        req.params.rendezvousId,
-        { $set: champsModifies },
-        { new: true }
-      );
 
-      if (!rendezVousMisAJour) {
-        return res.status(404).json({ message: 'Rendez-vous non trouvé' });
+      // modification de la date de début du rendez-vous, la date de fin et le type de récurrence (decaler tout les rdvs)
+      if (new Date(dateRendezVous).getTime()  !== new Date(rendezVous.dateRendezVous).getTime() || 
+      new Date(finRecurrence + 'T23:59:59').getTime() !== new Date(rendezVous.finRecurrence).getTime() || 
+      typeRecurrence !== rendezVous.typeRecurrence) {
+        req.body.createurEmail = rendezVous.createurEmail;
+        req.body.participants = rendezVous.participants;
+        req.body.agenda = rendezVous.agenda;
+        req.body.accepte = rendezVous.accepte;
+        req.body.refuse = rendezVous.refuse;
+        req.body.estRecurrent = 'on';
+        req.body.dateCreation = rendezVous.dateCreation;
+        req.body.couleur = rendezVous.couleur;
+        
+        await RendezVous.deleteMany({
+          agenda: rendezVous.agenda,
+          dateCreation: {
+            $gte: dateCreationStart,
+            $lt: dateCreationEnd
+          }
+        });
+        await this.creerRendezVous(req, res);     
+        return;    
       }
+    }
+    else {
 
+      // modification du rendez-vous seul
+      await RendezVous.updateOne(
+        { _id: rendezVous._id }, // Filtrer par ID du rendez-vous
+        { 
+          $set: {
+            nom: nom || rendezVous.nom,
+            description: description || rendezVous.description,
+            duree: {
+              heures: dureeHeures || rendezVous.duree.heures,
+              minutes: dureeMinutes || rendezVous.duree.minutes
+            },
+            couleur: couleur || rendezVous.couleur,
+            dateRendezVous: dateRendezVous || rendezVous.dateRendezVous
+          }
+        }
+      );
     }
 
     res.redirect('/rendezvous/' + req.params.agendaId);

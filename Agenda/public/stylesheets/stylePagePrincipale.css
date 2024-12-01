@@ -1,0 +1,131 @@
+body {
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+  
+  .container-home-page {
+    background-color: white;
+    /*padding: 30px;*/
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    /*max-width: 400px;*/
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  h1 {
+    color: #333;
+    /*margin-bottom: 10px;*/
+  }
+  
+  p {
+    color: #666;
+    /*margin-bottom: 20px;*/
+  }
+  
+  button {
+    background-color: rgb(4, 170, 192);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: rgb(13, 108, 121);
+  }
+
+  .agenda-partage-section{
+    margin-left: 1.7%;
+  }
+
+  .partager-avec{
+    overflow-y: auto ;
+    max-height: 100px;
+  }
+  
+  .bouton-agenda-action{
+    display: inline-flex;
+  }
+
+  .menu{
+    display: flex;
+  }
+
+  .compte{
+    display: ruby;
+    position: absolute;
+    right: 20px; 
+    padding-top: 0.3%;
+  }
+
+  .agenda{
+    display: ruby;
+  }
+
+  .error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .voir-bouton{
+    background-color: #89e22b;
+  }
+
+  .ajouter-bouton{
+    background-color: #89e22b;
+  }
+
+  .buttonaction{
+    display: flex;
+    justify-content: space-between;
+    gap:5px;
+  }
+
+  .agendaListUL{
+    display: inline-flex;
+    gap: 5%;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+  .header{
+    background-color:rgb(0, 188, 212);
+    box-shadow: 14px -8px 0 26px rgb(0, 188, 212);
+  }
+
+  .agendaList{
+  background-color: white; /* Fond blanc pour contraste */
+  border: 2px solid rgb(0, 188, 212);; /* Bordure bleue */
+  border-radius: 8px; /* Coins arrondis */
+  box-shadow: 0 4px 6px rgba(32, 33, 34, 0.3); /* Ombre légèrement bleue */
+  transition: box-shadow 0.3s ease, transform 0.3s ease; /* Animation fluide */
+  padding: 2%;
+  margin-top: 0.5%;
+  }
+
+  .mes-agendas{
+    display: ruby;
+  }
+
+  .agendaList:hover {
+    box-shadow: 0 8px 15px rgba(74, 144, 226, 0.5); /* Augmentation de l'ombre */
+    transform: translateY(-5px); /* Simule un effet 3D (légèrement levé) */
+  }
+
+  .mesagendas{
+    margin-left: 1.7%;
+  }
+
+  ul{
+    list-style-type: none; 
+    display: contents;
+  }

@@ -2,10 +2,11 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleRegister.css">
     <title><%= title %></title>
 </head>
 <body>
+    <div class="container">
     <h1><%= title %></h1>
     <form id="createrendezvous" action="/rendezvous/<%= agendaId %>/creer" method="POST">
         <label for="nom">Nom du rendez-vous :</label>
@@ -22,15 +23,20 @@
 
         <label for="dureeMinutes">(minutes) :</label>
         <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="0" required><br><br>
+
+        <div class="error-message" id="error-message" style="display: none;">
+            La durée du rendez-vous doit être d'au moins 30 minutes.
+        </div>
         
         <label style="visibility: hidden;" for="createurEmail">Createur :</label>
         <input name="createurEmail" value="<%= userEmailConnected %>" style="visibility: hidden;" readonly required> <br>
 
         <!-- Nouveaux champs pour la récurrence -->
-        <div class="form-group">
-            <label for="estRecurrent">Rendez-vous récurrent :</label>
+        <div class="all_recurence_2">
             <input type="checkbox" id="estRecurrent" name="estRecurrent">
+            <label class="all_recurence_label" for="estRecurrent">Rendez-vous récurrent :</label>
         </div>
+        <br>
         
         <div class="form-group" id="optionsRecurrence">
             <label for="typeRecurrence">Type de récurrence :</label>
@@ -40,6 +46,7 @@
                 <option value="semaine">Chaque semaine</option>
                 <option value="mensuel">Chaque mois</option>
             </select>
+            <br><br>
         
             <div class="form-group">
                 <label for="finRecurrence">Date de fin de récurrence :</label>
@@ -54,8 +61,6 @@
         <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
     </div>
 
-    <div id="error-message" style="color: red; display: none;">
-        La durée du rendez-vous doit être d'au moins 30 minutes.
     </div>
 
     <script>

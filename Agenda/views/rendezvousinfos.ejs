@@ -2,65 +2,118 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="../../../stylesheets/styleRegister.css">
     <title><%= title %></title>
 </head>
 <body>
-    <h1><%= title %></h1>
-    <form id="modifierRendezVousForm" action="/rendezvous/<%=agendaId%>/modifier/<%=rendezvous.id%>" method="POST">
 
-        <label for="nom">Nom du rendez-vous : </label>
-        <input type="text" id="nom" name="nom" value="<%=rendezvous.nom%>"required>
-        <br><br>
+    <div style="display: flex; gap:2%;">
+        <div class="container">
+            <h1><%= title %></h1>
+            <form id="modifierRendezVousForm" action="/rendezvous/<%=agendaId%>/modifier/<%=rendezvous.id%>" method="POST">
+                <label for="nom">Nom du rendez-vous : </label>
+                <input type="text" id="nom" name="nom" value="<%=rendezvous.nom%>"required>
+                <br>
+                <label for="description">Description :</label>
+                <input type="description" id="description" name="description" value="<%=rendezvous.description%>"required>
+                <br>
+                <label for="dateRendezVous">
+                    <% if (rendezvous.typeRecurrence === 'aucun') { %>
+                        Date du rendez-vous :
+                    <%}else{%>
+                        Date de début (récurrence) : 
+                    <%}%>
+                </label>
+                <input type="datetime-local" id="dateRendezVous" name="dateRendezVous" value="<%=dateRendezVousFormatted%>" required>
+                <br>
+                <% if (rendezvous.typeRecurrence !== 'aucun') { %>
+                    <div class="form-group" id="optionsRecurrence">
+                        <label for="typeRecurrence">Type de récurrence :</label>
+                        <select id="typeRecurrence" name="typeRecurrence">
+                            <option value="quotidien"  <% if (rendezvous.typeRecurrence === 'quotidien') {%><%="selected"%><%}%> >Chaque jour</option>
+                            <option value="semaine" <% if (rendezvous.typeRecurrence === 'semaine') {%><%="selected"%><%}%> >Chaque semaine</option>
+                            <option value="mensuel"  <% if (rendezvous.typeRecurrence === 'mensuel') {%><%="selected"%><%}%> > Chaque mois</option>
+                        </select>
+                        <br><br>
 
-
-        <label for="description">Description :</label>
-        <input type="description" id="description" name="description" value="<%=rendezvous.description%>"required>
-        <br><br>
-
-        <label for="dateRendezVous">Date du rendez-vous :</label>
-        <input type="datetime-local" id="dateRendezVous" name="dateRendezVous" value="<%=dateRendezVousFormatted%>" required>
-        <br><br>
-
-        <label for="dureeHeures">Durée (heures) :</label>
-        <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="<%=rendezvous.duree.heures%>" required>
-
-        <label for="dureeMinutes">(minutes) :</label>
-        <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="<%=rendezvous.duree.minutes%>" required>
-
-        <label for="couleur" hidden>Couleur :</label>
-        <input id="couleur" type="number" name="couleur" value="<%=rendezvous.couleur%>" hidden>     </select>
-        <br><br>
-        
-        <div>
-            <button>Appliquer les modifications</button>
+                        <label for="finRecurrence">Date de fin (récurrence) :</label>
+                        <input type="date" id="finRecurrence" value="<%=new Date(rendezvous.finRecurrence).toISOString().split("T")[0]%>" name="finRecurrence">
+                    </div>
+                <%}%>
+                <label for="dureeHeures">Durée (heures) :</label>
+                <input type="number" id="dureeHeures" name="dureeHeures" min="0" value="<%=rendezvous.duree.heures%>" required>
+                <label for="dureeMinutes">(minutes) :</label>
+                <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="<%=rendezvous.duree.minutes%>" required>
+                <input id="couleur" type="number" name="couleur" value="<%=rendezvous.couleur%>" hidden>     </select>
+                <br><br>
+                <div class="error-message" style="display: none;">
+                    La durée du rendez-vous doit être d'au moins 30 minutes.
+                </div>
+                <br><br>
+                <div class="all_recurence" <% if (rendezvous.typeRecurrence === 'aucun') {%><%="style=display:none;"%><% }%>>
+                    <input id="recurrence1" type="checkbox" name="recurrence">
+                    <label class="all_recurence_label" 
+                    for="recurrence">Agir sur toutes les récurrences </label>
+                </div>
+                <br>
+                
+                <div>
+                    <button>Appliquer les modifications</button>
+                </div>
+                <br>
+            </form>        
+            <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rendezvous.id%>" method="POST">
+                    <div style="display: none;">
+                        <label for="recurrence" ></label>
+                        <input id="recurrence2" type="checkbox" name="recurrence">
+                    </div>
+                    <button type="submit">Supprimer le Rendez-Vous</button>
+            </form>
+            <br>
+            <form action="/rendezvous/<%=agendaId%>/accepter/<%=rendezvous.id%>" method="POST">
+                <div style="display: none;">
+                    <label for="recurrence" ></label>
+                    <input id="recurrence3" type="checkbox" name="recurrence">
+                </div>
+                <button type="submit">Participer à ce rendez-vous</button>
+            </form>
+            <br>
+            <form action="/rendezvous/<%=agendaId%>/refuser/<%=rendezvous.id%>" method="POST">
+                <div style="display: none;">
+                    <label for="recurrence" ></label>
+                    <input id="recurrence4" type="checkbox" name="recurrence">
+                </div>
+                <button>Ne pas participer à ce Rendez-Vous</button>
+            </form>
+            <br>
+            <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
+            
         </div>
-    </form>
 
-    <!-- <% if (rendezvous.estRecurrent) { %>
-        <div>
-          <input type="checkbox" id="modifierTousLesRecurrents" name="modifierTousLesRecurrents">
-          <label for="modifierTousLesRecurrents">Modifier tous les rendez-vous récurrents suivants</label>
+        <div class="container">
+            <h1>Informations sur le Rendez-vous</h1>
+            <p style="text-align: left;color: dimgray;">
+                Crée par <b><%= rendezvous.createurEmail %></b> le
+                <i><%= new Date(rendezvous.dateCreation).toLocaleString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }).replace(/^\w/, (c) => c.toUpperCase()) %></i>
+            </p>
+            <p style="text-align: left;color: dimgray;">
+                Description: <%= rendezvous.description %> 
+            </p>
+            <div class="list-members">
+                <h3>Participants :</h3>
+                <% if (rendezvous.participants.length > 0) { %>
+                    <ul>
+                        <% rendezvous.participants.forEach(function(participant) { %>
+                            <li><%= participant %></li>
+                        <% }); %>
+                    </ul>
+                <% } else { %>
+                    <p>Aucun participant pour le moment.</p>
+                <% } %>
+            </div>
         </div>
-      <% } %> -->
-    
-    <form action="/rendezvous/<%=agendaId%>/supprimer/<%=rendezvous.id%>" method="POST">
-            <button>Supprimer le Rendez-Vous</button>
-    </form>
-    <form action="/rendezvous/<%=agendaId%>/accepter/<%= rendezvous.id %>" method="POST">
-        <button>Accepter le Rendez-vous</button>
-    </form>
-    <form action="/rendezvous/<%=agendaId%>/refuser/<%= rendezvous.id %>" method="POST">
-        <button>Refuser le Rendez-Vous</button>
-    </form>
-
-    
-    <br>
-    <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
-
-    <div id="error-message" style="color: red; display: none;">
-        La durée du rendez-vous doit être d'au moins 30 minutes.
     </div>
+    
     
     <script>
          // Fonction pour ajuster la durée maximale
@@ -114,6 +167,34 @@
                 document.getElementById('error-message').style.display = 'block'; // Afficher le message
                 event.preventDefault(); // empecher la soumission du formulaire
             }
+        });
+
+        const checkbox1 = document.getElementById('recurrence1');
+        const checkbox2 = document.getElementById('recurrence2');
+        const checkbox3 = document.getElementById('recurrence3');
+        const checkbox4 = document.getElementById('recurrence4');
+
+        checkbox1.addEventListener('change', function () {
+            checkbox2.checked = checkbox1.checked;
+            checkbox3.checked = checkbox1.checked;
+            checkbox4.checked = checkbox1.checked;
+        });
+
+        const typeRecurrenceSelect = document.getElementById("typeRecurrence");
+        const dateRecurrenceInput = document.getElementById("dateRendezVous");
+        const finRecurrenceInput = document.getElementById("finRecurrence");
+
+        [typeRecurrenceSelect, dateRecurrenceInput, finRecurrenceInput].forEach(input => {
+            input.addEventListener("change", function () {
+                checkbox1.checked = true; checkbox2.checked = true; 
+                checkbox1.value = true; checkbox2.value = true; 
+                checkbox1.addEventListener("click", (event) => {
+                    event.preventDefault(); // Prevents state toggle
+                });
+                checkbox2.addEventListener("click", (event) => {
+                    event.preventDefault(); // Prevents state toggle
+                });
+            });
         });
 
     </script>

@@ -29,9 +29,10 @@ router.post('/:agendaId/partager', agendaController.partagerAgenda);
 router.post('/:agendaId/annuler-partage', agendaController.annulerPartage);
 
 // route modifier formulaire
-router.get('/:agendaId/modifier' , function(req ,res){
+router.get('/:agendaId/modifier' , async function(req ,res, next){
     const agendaId = req.params.agendaId;
-    res.render('agendainfos', { title : 'Modifier agenda', agendaId , userEmailConnected : localStorage.getItem("userEmail")});
+    const agenda = await agendaController.getAgenda(req, res,next,  agendaId)
+    res.render('agendainfos', { title : 'Modifier agenda', agenda, agendaId , userEmailConnected : localStorage.getItem("userEmail")});
 });
 
 // route appliquer modif
