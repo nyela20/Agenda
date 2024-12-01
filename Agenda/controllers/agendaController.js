@@ -1,4 +1,5 @@
 const Agenda = require('../models/agenda');
+const User = require('../models/user');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 const path = require('path');

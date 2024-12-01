@@ -48,5 +48,10 @@ router.get('/reset-password/:token', userController.getResetPassword);
 
 router.post('/reset-password/:token', userController.postResetPassword);
 
+router.post('/compte/bloquerutilisateurs', async function(req, res){
+    userController.bloquerEmailUtilisateur(req, res);
+});
+
+
 
 module.exports = router;
