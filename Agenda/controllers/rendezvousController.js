@@ -614,23 +614,35 @@ exports.afficherRendezVousMois = async (req, res) => {
 //supprimer un rendez vous
 exports.supprimerRendezVous = async (req, res) => {
   try{
-    const rendezVous = await RendezVous.findById(req.params.rendezvousId);
+  
+    if (req.body.recurrence) {
+      const rendezVous = await RendezVous.findById(req.params.rendezvousId);
 
-    if(rendezVous.estRecurrent){
+      if (!rendezVous) {
+        return res.status(404).send('Rendez-vous non trouvé');
+      }
+
+      const dateCreationStart = new Date(
+        Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000
+      );
+      const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
+
+      // suppression avec recurrence
       await RendezVous.deleteMany({
-        agenda: rendezVous.agenda,
-        estRecurrent : true,
-        typeRecurrence : rendezVous.typeRecurrence,
-        dateRendezVous : {$gte : rendezVous.dateRendezVous},
-        finRecurrence : rendezVous.finRecurrence
+        dateCreation: {
+          $gte: dateCreationStart,
+          $lt: dateCreationEnd    
+        },
+        agenda: rendezVous.agenda
       });
-    }else{
-
+    
+    } else {
+      //suppression seule
       await RendezVous.findByIdAndDelete(req.params.rendezvousId);
     }
+
     res.redirect('/rendezvous/' + req.params.agendaId);
 
-    ;
   } catch (error) {
     res.status(501).send('Erreur lors de la supression du rendez-vous : ' +  error.message);
   }
