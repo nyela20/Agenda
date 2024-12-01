@@ -59,27 +59,57 @@ exports.afficherAgendas = async (req, res) => {
 
 
 // partager agenda
-exports.partagerAgenda = async(req , res) =>{
-  try{
-
+exports.partagerAgenda = async(req, res) => {
+  try {
     const agendaId = req.params.agendaId;
     const { emailPartage } = req.body;
-    
+    const userEmailConnected = req.body.userEmailConnected;
+
     // Vérifier si l'agenda existe
     const agenda = await Agenda.findById(agendaId);
+    
+    // Récupérer les agendas pour le rendu 
+    const agendasCrees = await Agenda.find({ createurEmail: userEmailConnected });
+    const agendasPartages = await Agenda.find({ 'partages.email': userEmailConnected });
+
     if (!agenda) {
-      return res.status(404).json({ message: 'Agenda non trouvé' });
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Agenda non trouvé'
+      });
     }
 
     // Vérifier si l'utilisateur est le créateur
-    if (agenda.createurEmail !== req.body.userEmailConnected) {
-      return res.status(403).json({ message: 'Non autorisé à partager cet agenda' });
+    if (agenda.createurEmail !== userEmailConnected) {
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Non autorisé à partager cet agenda'
+      });
+    }
+
+    // Vérifier si l'utilisateur essaie de partager avec lui-même
+    if(emailPartage === userEmailConnected) {
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Vous ne pouvez pas partager l\'agenda avec vous-même'
+      });
     }
 
     // Vérifier si l'agenda est déjà partagé avec cet utilisateur
     const partageExistant = agenda.partages.find(p => p.email === emailPartage);
     if (partageExistant) {
-      return res.status(400).json({ message: 'Agenda déjà partagé avec cet utilisateur' });
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Agenda déjà partagé avec cet utilisateur'
+      });
     }
 
     // Ajouter le partage
@@ -88,14 +118,16 @@ exports.partagerAgenda = async(req , res) =>{
 
     res.redirect('/agenda');
 
-  }catch(error){
-    res.status(500).json({
-      message: 'Erreur lors du partage de l\'agenda',
-      error: error.message
+  } catch(error) {
+    
+    return res.render('agenda', {
+      userEmailConnected,
+      agendasCrees,
+      agendasPartages,
+      error: 'Erreur lors du partage de l\'agenda'
     });
   }
 };
-
 
 // Annuler le partage d'un agenda
 exports.annulerPartage = async (req, res) => {

@@ -2,12 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
     <title>Page Principale</title>
 </head>
 <body>
     <h1>Page Principale</h1>
     <h2>Votre session : <%= userEmailConnected %></h2>
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-message">
+            <%= error %>
+        </div>
+    <% } %>
 
     <div>
         <form action="/agenda/creer" method="GET">
