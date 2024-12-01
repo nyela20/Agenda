@@ -24,44 +24,13 @@ router.get('/:agendaId/informations/:rendezvousId', async function(req, res, nex
     const dateRendezVous = new Date(rendezvous.dateRendezVous);
     dateRendezVous.setHours(dateRendezVous.getHours() + 1); // Heure d'hiver 
     const dateRendezVousFormatted = dateRendezVous.toISOString().slice(0, 16);  // Récupère YYYY-MM-DDTHH:MM
-    const dateRendezVousFin = new Date(rendezvous.finRecurrence);
-    dateRendezVousFin.setHours(dateRendezVous.getHours() + 1); // Heure d'hiver 
-    const dateRendezVousFormattedFin = dateRendezVousFin.toISOString().slice(0, 16);  // Récupère YYYY-MM-DDTHH:MM
     res.render('rendezvousinfos', 
-        { title: 'Informations sur le Rendez-vous', 
-            rendezvous, dateRendezVousFormatted,  dateRendezVousFormattedFin,
+        { title: 'Modifier les informations du Rendez-vous', 
+            rendezvous, dateRendezVousFormatted,
             agendaId, 
             userEmailConnected: localStorage.getItem("userEmail") });
 });
 
-// Nouvelle route pour gérer la récurrence
-// router.get('/:agendaId/recurrents/:rendezvousId', async function(req, res) {
-//     try {
-//         const rendezvous = await rendezVousController.getRendezVousById(req);
-//         if (rendezvous.estRecurrent) {
-//             // Obtenir tous les rendez-vous de la série
-//             const serieRendezVous = await rendezVousController.getSerieRendezVous(rendezvous);
-//             res.json(serieRendezVous);
-//         } else {
-//             res.status(400).json({ message: "Ce rendez-vous n'est pas récurrent" });
-//         }
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// });
-
-// // création d'un nouveau rendez-vous (mise à jour pour gérer la récurrence)
-// router.post('/:agendaId/creer', async function(req, res, next) {
-//     try {
-//         await rendezVousController.creerRendezVous(req, res, next);
-//     } catch (error) {
-//         console.error('Erreur lors de la création du rendez-vous:', error);
-//         res.status(500).json({ 
-//             message: 'Erreur lors de la création du rendez-vous',
-//             error: error.message 
-//         });
-//     }
-// });
 
 // suppression d'un rendez-vous
 router.post('/:agendaId/supprimer/:rendezvousId', async function(req, res, next) {

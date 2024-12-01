@@ -77,7 +77,7 @@
                 <br>
                 <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
                 <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
-                <button type="submit"> Mettre à jour affichage </button>
+                <button type="submit" style="display:none"> Mettre à jour affichage </button>
             </form>
             <hr>
         </div>
@@ -266,10 +266,19 @@
                                                         </span>
                                                     <% } %>
                                                 </div>
-                                            <%}
-                                        }%> 
+                                            <%}else{%>
+                                                <!--IGNORER CETTE PARTIE -->
+                                                <div style="visibility:hidden; pointer-events:none;"
+                                                    class="rendez-vous-cell<%=rendezvous.couleur%> <%= rendezvous.estRecurrent ? 'recurring' : '' %>"
+                                                    onclick="window.location.href='/rendezvous/<%=agenda.id%>/informations/<%=rendezvous.id%>'">
+                                                    <div class="nom-rendez-vous"><%="Nom :" +  rendezvous.nom %></div>
+                                                    <%="Heure :" +  rendezvous.dateRendezVous.getHours() + "h" + rendezvous.dateRendezVous.getMinutes() + "min"%><br>
+                                                </div>
+                                                <!--IGNORER CETTE PARTIE -->
+                                            <%}%>
+                                        <%}%> 
                                     <% 
-                                    }); 
+                                    });
                                 %>
                             </div> 
                 <% 
@@ -280,5 +289,17 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const checkboxes = document.querySelectorAll('#checkboxForm input[type="checkbox"]');
+        const form = document.getElementById('checkboxForm');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                form.submit();
+            });
+        });
+    </script>
+
 </body>
 </html>

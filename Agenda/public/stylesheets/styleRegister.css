@@ -43,6 +43,11 @@ form {
     margin-left: 2%;
 }
 
+.list-members{
+    height: fit-content;
+    overflow: auto;
+}
+
 .form-group {
     margin-bottom: 15px;
 }

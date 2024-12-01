@@ -6,7 +6,7 @@ body{
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 5px;
+    column-gap: 5px;
     overflow: auto;
 }
 

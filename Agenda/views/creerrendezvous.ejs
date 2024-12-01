@@ -23,6 +23,10 @@
 
         <label for="dureeMinutes">(minutes) :</label>
         <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="0" required><br><br>
+
+        <div class="error-message" id="error-message" style="display: none;">
+            La durée du rendez-vous doit être d'au moins 30 minutes.
+        </div>
         
         <label style="visibility: hidden;" for="createurEmail">Createur :</label>
         <input name="createurEmail" value="<%= userEmailConnected %>" style="visibility: hidden;" readonly required> <br>
@@ -57,9 +61,6 @@
         <a href="/rendezvous/<%=agendaId%>"><button>Retour</button></a>
     </div>
 
-    <div id="error-message" style="color: red; display: none;">
-        La durée du rendez-vous doit être d'au moins 30 minutes.
-    </div>
     </div>
 
     <script>

@@ -108,7 +108,7 @@ exports.updateUserByMail = async (req, res) => {
     const{nom , email} = req.body;
     const oldMail = localStorage.getItem("userEmail");
     
-    await User.updateOne({"email":oldMail},{$set:{"nom":nom,"email":email}});
+    await User.updateOne({"email":oldMail},{$set:{"name":nom,"email":email}});
     
     temp = await Agenda.find({"partages.email":oldMail});
     

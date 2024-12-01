@@ -656,12 +656,13 @@ exports.supprimerRendezVous = async (req, res) => {
 
 };
 
-// odifier pour accepter les rendezvous recurrents
+// modifier pour accepter les rendezvous recurrents
 exports.accepterRendezVous = async (req, res, next) => {
   try {
     const rendezvousId = req.params.rendezvousId;
     const agendaId = req.params.agendaId;
     const rendezvous = await RendezVous.findById(rendezvousId);
+    const userConnected = localStorage.getItem("userEmail");
 
      // mis a jour de tout les rdvs recurrents
      if(req.body.recurrence){
@@ -684,18 +685,22 @@ exports.accepterRendezVous = async (req, res, next) => {
       
       await RendezVous.updateMany(
         { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
-        {  $set: {  refuse : false, accepte : true } }
+        {  $set: {  refuse : false, accepte : true },
+          $addToSet : { participants : userConnected}
+        }
       );
 
     }else{
-      // mis a jour de un seul
+      // mis a jour de rdv un seul
       await RendezVous.updateOne(
         { _id: rendezvous._id }, 
-        {  $set: {  refuse : false, accepte : true } }
+        {  $set: {  refuse : false, accepte : true },
+        $addToSet : { participants : userConnected}
+        }
       );
     }
 
-    res.redirect(`/rendezvous/${agendaId}`);
+    res.redirect(`/rendezvous/${agendaId}/informations/${rendezvousId}`);
   } catch (error) {
     res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
   }
@@ -706,6 +711,7 @@ exports.refuserRendezVous = async (req, res, next) => {
     const rendezvousId = req.params.rendezvousId;
     const agendaId = req.params.agendaId;
     const rendezvous = await RendezVous.findById(rendezvousId);
+    const userConnected = localStorage.getItem("userEmail");
 
     // mis a jour de tout les rdvs recurrents
     if(req.body.recurrence){
@@ -727,21 +733,22 @@ exports.refuserRendezVous = async (req, res, next) => {
       const allRdvIds = allredvrec.map(rdv => rdv._id);
       
       await RendezVous.updateMany(
-        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
-        {  $set: {  refuse : true, accepte : false } }
+        { _id: { $in: allRdvIds } }, 
+        {  $set: {  refuse : true, accepte : false },
+           $pull: { participants: userConnected }
+        }
       );
 
     }else{
       // mis a jour de un seul
       await RendezVous.updateOne(
         { _id: rendezvous._id }, 
-        {  $set: {  refuse : true, accepte : false } }
+        {  $set: {  refuse : true, accepte : false },
+           $pull: { participants: userConnected }
+        }
       );
     }
-
-
-
-    res.redirect(`/rendezvous/${agendaId}`);
+    res.redirect(`/rendezvous/${agendaId}/informations/${rendezvousId}`);
   } catch (error) {
     res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
   }
@@ -835,6 +842,7 @@ exports.modifierRendezVous = async (req, res) => {
         req.body.refuse = rendezVous.refuse;
         req.body.estRecurrent = 'on';
         req.body.dateCreation = rendezVous.dateCreation;
+        req.body.couleur = rendezVous.couleur;
         
         await RendezVous.deleteMany({
           agenda: rendezVous.agenda,

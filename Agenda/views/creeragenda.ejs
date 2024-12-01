@@ -32,18 +32,16 @@
                 <option value="6">Violet</option>
                 <option value="7">Orange</option>
             </select>
-            <br>
+            <br><br>
+            <button type="submit">Créer Agenda</button>
+            <br><br>
             <form action="/agenda/importer" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
                 <input type="file" id="file" name="file" accept=".csv">
                 <br>
                 <button type="submit">Importer</button>
             </form>
-            <br>
-            <button type="submit">Créer Agenda</button>
             <br><br>
             <button type="button" onclick="window.location.href='/agenda';"> Annuler </button>               
-
-
         </form>
     </div>
 

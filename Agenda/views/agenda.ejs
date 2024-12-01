@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylePagePrincipale.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/stylePagePrincipale.css">
     <title>Menu Principale</title>
+    
 </head>
 <body>
     <header class="header">
@@ -52,6 +53,11 @@
                                     <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
                                     <button type="submit">Partager</button>
                                 </form>
+                                <% if (typeof error !== 'undefined' && error) { %>
+                                    <div class="error-message">
+                                        <%= error %>
+                                    </div>
+                                <% } %>
                                 <br>
                                 <div class="buttonaction">
                                     <form action="/rendezvous/<%= agenda.id %>" method="GET">
