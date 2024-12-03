@@ -648,6 +648,10 @@ exports.supprimerRendezVous = async (req, res) => {
       await RendezVous.findByIdAndDelete(req.params.rendezvousId);
     }
 
+    if(req.params.blocage){
+      return true;
+    }
+
     res.redirect('/rendezvous/' + req.params.agendaId);
 
   } catch (error) {

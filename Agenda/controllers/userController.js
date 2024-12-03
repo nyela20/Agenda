@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto'); // token pour reset password
 const { error } = require('console');
 require('dotenv').config();
+const rendezVousController = require('../controllers/rendezvousController');
+const agendaController = require('../controllers/agendaController');
 
 const SALT_ROUNDS = 10; // Nombre de tours de salage pour bcrypt
 
@@ -255,3 +257,104 @@ exports.postResetPassword = async (req , res ) =>{
   }
 }
 
+exports.bloquerEmailUtilisateur = async (req , res) =>{
+  try {
+
+    let noninsert = [];
+    const email = localStorage.getItem("userEmail");
+    userData = await User.findOne({"email" : email });
+
+    const emails = req.body.emails;
+
+    const emailsRegex = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4},)+/;
+
+    emails2 = emails.split(",");
+    userData = await User.findOne({"email" : email });
+    allAgendas = await Agenda.find({"createurEmail" : email});
+
+    for(let i = 0; i < emails2.length;i++){
+
+      let user = await User.findOne({"email" : emails2[i] });
+      // console.log(user);
+
+      let nbreturn = await User.findOne({"email" : emails2[i] }).count();
+      // console.log(nbreturn);
+    
+      if(nbreturn > 0 && emailsRegex.test(emails2[i]) && !userData.blocked.includes(emails2[i])){
+        console.log(emails2[i]);
+        await User.updateOne({"email":email},{$push:{"blocked":emails2[i]}});
+
+        for(let agenda of allAgendas){
+          let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : emails2[i]});
+          // console.log(rendezvousagenda," ----rendezvous agenda");
+          
+          for(let rdv of rendezvousagenda){
+            req.body.recurrence = false;
+            req.params.rendezvousId = rdv._id;
+            req.params.blocage = true;
+            // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----req");
+            await rendezVousController.supprimerRendezVous(req);
+          }
+          const partageExistant = agenda.partages.find(p => p.email === emails2[i]);
+          if(partageExistant){
+            req.params.agendaId = agenda._id;
+            req.body.emailPartage = emails2[i];
+            req.body.userEmailConnected = email;
+            req.params.blocage = true;
+
+            // console.log(req.params.agendaId, req.body.emailPartage, req.body.userEmailConnected, " ----req annuler partage")
+            await agendaController.annulerPartage(req);
+          }
+        }
+
+        //partie pour s'occuper des de nos occurences de rendezvous et d'agendas dans ceux de emails2[i]
+        //allhisagenda recupere tous les agendas de emails2[i]
+        allhisAgendas = await Agenda.find({"createurEmail" : emails2[i]});
+
+        //parcours tous les agendas dans allhisagendas
+        for(let agenda of allhisAgendas){
+          //trouve tout nos rdv dans l'instance d'un agenda "agenda" de allhisagenda
+          let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : email});
+
+          //parcours les rdv qu'on as trouve et les supprimes de l'instance d'agenda
+          for(let rdv of rendezvousagenda){
+            req.body.recurrence = false;
+            req.params.rendezvousId = rdv._id;
+            req.params.blocage = true;
+            // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----reqhis");
+            await rendezVousController.supprimerRendezVous(req);
+          }
+          //annule le partage de l'instance d'agenda qui nous à été fait si il nous à été partagé
+          const partageExistant = agenda.partages.find(p => p.email === email);
+          if(partageExistant){
+            req.params.agendaId = agenda._id;
+            req.body.emailPartage = email;
+            req.body.userEmailConnected = emails2[i];
+            req.params.blocage = true;
+
+            // console.log(req.params.agendaId, req.body.emailPartage, req.body.userEmailConnected, " ----req annuler partagehis")
+            await agendaController.annulerPartage(req);
+          }
+        }
+
+
+
+      }else{
+          // console.log("lol emails2");
+          noninsert.push(emails2[i]);
+      }
+    }
+    if(noninsert.length > 0){
+      return res.render('compte' , {title : 'Votre compte', userData, noninsert});
+    }
+
+    
+
+    res.render('compte' , {title : 'Votre compte', userData});
+    console.log("après render");
+    
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
