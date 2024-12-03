@@ -20,6 +20,25 @@
                 <button>Appliquer les modifications</button>
             </div>
         </form>
+        <form action="/users/compte/bloquerutilisateurs" method="POST">
+            <label for="emails">Emails à bloquer (Séparés par des virgules et sans espaces):</label>
+            <br>
+            <input type="text" id="emails" name="emails">
+            <br><br>
+            <div>
+                <button>Bloquer Mails</button>
+            </div>
+            <%if(typeof noninsert !== 'undefined' && noninsert.length > 0){%>
+                <div class="error-message">
+                        <span>Ces mails n'ont pas pu être bloqué car inexistant ou déjà bloqué :</span>
+                        <br>
+                        <% for(i = 0; i < noninsert.length ; i++){ %>
+                            <%=noninsert[i]%>
+                            <br>
+                        <% } %>
+                </div>
+            <% } %>
+        </form>
         <br>
         <a href="/agenda"><button>Retour</button></a>
     </div>

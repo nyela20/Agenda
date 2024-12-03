@@ -3,6 +3,7 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 const path = require('path');
 const RendezVous = require('../models/rendezvous');
+const User = require('../models/user');
 
 // creation/sauvegarde agenda dans bdd
 exports.creerAgenda = async (req, res) => {
@@ -112,6 +113,30 @@ exports.partagerAgenda = async(req, res) => {
       });
     }
 
+    let userPartage = await User.findOne({"email": emailPartage });
+    console.log(userPartage.blocked);
+    //teste si l'utilisateur cible à bloqué l'utilisateur connecté avant le partage
+    if(userPartage.blocked.includes(userEmailConnected)){
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Cet utilisateur vous à bloqué'
+      });
+    }
+    
+    let userConnected = await User.findOne({"email": userEmailConnected});
+    //teste si l'utilisateur connecté à bloqué l'utilisateur
+    if(userConnected.blocked.includes(emailPartage)){
+      return res.render('agenda', {
+        userEmailConnected,
+        agendasCrees,
+        agendasPartages,
+        error: 'Vous avez bloqué cet utilisateur'
+      });
+    }
+    
+
     // Ajouter le partage
     agenda.partages.push({ email: emailPartage });
     await agenda.save();
@@ -150,6 +175,10 @@ exports.annulerPartage = async (req, res) => {
     // Retirer le partage
     agenda.partages = agenda.partages.filter(p => p.email !== emailPartage);
     await agenda.save();
+
+    if(req.params.blocage){
+      return true;
+    }
 
     res.redirect('/agenda');
   } catch (error) {
