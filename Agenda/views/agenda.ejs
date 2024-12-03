@@ -2,125 +2,429 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylePagePrincipale.css">
-    <title>Menu Principale</title>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+    <title>Menu principal</title>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
 </head>
 <body>
-    <header class="header">
-        <ul class="menu">
-            <div class="agenda">
-                <h1>Agenda</h1>
-            </div>
-            <div class="compte">
-                <li><h2><%= userEmailConnected %></h2></li>
-                <li>
-                    <form action = "/users/compte" method="GET">
-                        <button type="submit"> Modifier votre compte </button>
-                    </form>
-                </li>
-                <li>                 
-                    <form id="logoutForm" action="/users/logout" method="GET">
-                        <button type="submit" id="logoutBtn">Déconnexion</button>
-                    </form>
-                </li>
-            </div>
-        </ul>
-    </header>
 
-    <hr>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    function timeAgo(date) {
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      let interval = Math.floor(seconds / 31536000);
 
-    <div class="all-agenda">
-        <div class="agenda-section">
-            <div class="mes-agendas">
-                <h2 class="mesagendas">Mes Agendas</h2>
-                    <form action="/agenda/creer" method="GET">
-                        <button class="ajouter-bouton" type="submit">Ajouter un agenda</button>
-                    </form>
-            </div>
-            <% if (agendasCrees.length > 0) { %>
-                <ul class="agendaListUL">
-                    <% agendasCrees.forEach(agenda => { %>
-                        <li class="agendaList">
-                            <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
-                            <strong>Description :</strong> <%= agenda.description %><br>
-                            <!--<strong>Email du créateur :</strong> <%= //agenda.createurEmail %><br>-->
-                            
-                            <!-- Formulaire de partage -->
-                            <div class="partage-form">
-                                <form action="/agenda/<%= agenda.id %>/partager" method="POST">
-                                    <input type="email" name="emailPartage" placeholder="Email de l'utilisateur" required>
-                                    <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
-                                    <button type="submit">Partager</button>
-                                </form>
-                                <br>
-                                <div class="buttonaction">
-                                    <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                                        <button>Voir</button>
-                                    </form>
-                                    <form action="/agenda/<%= agenda.id %>/modifier" method="GET">
-                                        <button>Modifier</button>
-                                    </form>
-                                    <form action="/agenda/supprimer/<%= agenda._id %>" method="GET">
-                                        <button>Supprimer</button>
-                                    </form>
-                                    <form action="/agenda/export/<%= agenda._id %>" method="GET">
-                                        <button>Exporter</button>
-                                    </form>
-                                </div>
-                                
-                                <!-- Liste des partages -->
-                                <% if(agenda.partages && agenda.partages.length > 0) { %>
-                                    <h4>Partagé avec :</h4>
-                                    <div class="partager-avec">
-                                        <ul>
-                                            <% agenda.partages.forEach(partage => { %>
-                                                <div>
-                                                <li>
-                                                    <div>
-                                                        <%= partage.email %>
-                                                    </div>
-                                                    <div>
-                                                    <form action="/agenda/<%= agenda.id %>/annuler-partage" method="POST">
-                                                        <input type="hidden" name="emailPartage" value="<%= partage.email %>">
-                                                        <input type="hidden" name="userEmailConnected" value="<%= userEmailConnected %>">
-                                                        <button type="submit">Annuler le partage</button>
-                                                    </form>
-                                                    <div>
-                                                </li>
-                                                <div>
-                                            <% }) %>
-                                        </ul>
-                                    </div>
-                                <% } %>
-                            </div>
+      if (interval > 1) return interval + " years ago";
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) return interval + " months ago";
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) return interval + " days ago";
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) return interval + " hours ago";
+      interval = Math.floor(seconds / 60);
+      if (interval > 1) return interval + " minutes ago";
+      return "just now";
+    }
 
-                        </li>
-                    <% }) %>
-                </ul>
-            <% } %>
+    const timeElements = document.querySelectorAll('.time-elapsed');
+    timeElements.forEach(element => {
+      const timestamp = element.getAttribute('data-timestamp');
+      console.log(element)
+      const timeAgoText = timeAgo(new Date(timestamp));
+      element.textContent = timeAgoText;
+    });
+  });
+</script>
+
+<header class="fixed bg-white w-full flex justify-center border-b border-primary">
+    <div class="max-w-7xl w-full flex items-center justify-between h-[72px]">
+        <div>
+            <a href="/agenda"><h1 class="text-xl font-semibold">Agenda</h1></a>
         </div>
-
-        <div class="agenda-partage-section">
-            <h2>Agendas partagés avec moi</h2>
-            <% if (agendasPartages.length > 0) { %>
-                <ul class="agendaListUL">
-                    <% agendasPartages.forEach(agenda => { %>
-                        <li class="agendaList">
-                            <strong>Nom de l'agenda :</strong> <%= agenda.nom %><br>
-                            <strong>Description :</strong> <%= agenda.description %><br>
-                            <strong>Créateur :</strong> <%= agenda.createurEmail %><br>
-                            <div class="bouton-agenda-action">
-                                <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                                    <button>Voir</button>
-                                </form>
+        <div class="flex items-center gap-3">
+            <button data-dropdown-toggle="notifications-dropdown"
+                    class="py-2.5 px-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.35419 21C10.0593 21.6224 10.9856 22 12 22C13.0145 22 13.9407 21.6224 14.6458 21M18 8C18 6.4087 17.3679 4.88258 16.2427 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.8826 2.63214 7.75738 3.75736C6.63216 4.88258 6.00002 6.4087 6.00002 8C6.00002 11.0902 5.22049 13.206 4.34968 14.6054C3.61515 15.7859 3.24788 16.3761 3.26134 16.5408C3.27626 16.7231 3.31488 16.7926 3.46179 16.9016C3.59448 17 4.19261 17 5.38887 17H18.6112C19.8074 17 20.4056 17 20.5382 16.9016C20.6852 16.7926 20.7238 16.7231 20.7387 16.5408C20.7522 16.3761 20.3849 15.7859 19.6504 14.6054C18.7795 13.206 18 11.0902 18 8Z"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div id="notifications-dropdown"
+                 class="z-10 hidden bg-white rounded-lg shadow max-w-xl w-full dark:bg-gray-700 px-8 py-6">
+                <ol class="relative border-s border-gray-200 dark:border-gray-700 space-y-10">
+                    <% if (notifications.length > 0) { %>
+                    <% notifications.reverse().slice(0, 5).forEach(notification => { %>
+                        <li class="ms-6">
+                        <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -start-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
+                            <div class="rounded-full h-6 w-6 bg-gray-50 flex items-center justify-center">N</div>
+                        </span>
+                            <div class="items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:flex dark:bg-gray-700 dark:border-gray-600">
+<!--                                <time class="mb-1 text-xs font-normal text-gray-400 sm:order-last sm:mb-0"><%  %></time>-->
+                                <time class="mb-1 text-xs font-normal text-gray-400 sm:order-last sm:mb-0 time-elapsed" data-timestamp="<%= notification.createdAt %>"></time>
+                                <div class="text-sm font-normal text-gray-500 dark:text-gray-300">
+                                    <%= notification.message %>
+                                </div>
                             </div>
                         </li>
                     <% }) %>
-                </ul>
-            <% } else { %>
-                <p>Aucun agenda partagé.</p>
-            <% } %>
+                    <%} else {%>
+                        <li class="text-center text-gray-400 dark:text-gray-300">Aucune notification</li>
+                    <% } %>
+                </ol>
+            </div>
+            <div>
+                <div class="rounded-full cursor-pointer h-10 w-10 flex items-center justify-center p-1 bg-gray-50"
+                     data-dropdown-toggle="dropdown">
+                    <%= userNameConnected.split(' ').map((value) => value.slice()[0]) %>
+                </div>
+                <div id="dropdown"
+                     class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                        <li>
+                            <a href="/users/compte"
+                               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Paramètres</a>
+                        </li>
+                        <li>
+                            <a href="/users/logout"
+                               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Se
+                                déconnecter</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
+</header>
+
+<% if (toast) { %>
+    <div id="toast"
+         class="fixed flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-gray-200 rounded-lg shadow top-5 right-5 dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
+         role="alert">
+        <% if (toast.type === 'success') { %>
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                     viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                </svg>
+                <span class="sr-only">Check icon</span>
+            </div>
+        <% } %>
+        <% if (toast.type === 'error') { %>
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
+                <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                     viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+                </svg>
+                <span class="sr-only">Error icon</span>
+            </div>
+        <% } %>
+        <div class="ms-3 text-sm font-normal w-full"><%= toast.message %></div>
+        <button type="button"
+                class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+                data-dismiss-target="#toast" aria-label="Close">
+            <span class="sr-only">Close</span>
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            </svg>
+        </button>
+    </div>
+<% } %>
+
+<div class="pt-32 w-full flex flex-col items-center">
+    <div class="max-w-7xl w-full">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-3xl text-primary">Agendas</h2>
+            <button
+                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    type="button" data-drawer-target="drawer-right-example" data-drawer-show="drawer-right-example"
+                    data-drawer-placement="right" aria-controls="drawer-right-example"
+            >Ajouter un agenda
+            </button>
+        </div>
+        <div id="drawer-right-example"
+             class="fixed top-0 right-0 z-40 h-screen px-6 py-6 overflow-y-auto transition-transform translate-x-full bg-white max-w-xl w-full dark:bg-gray-800 min-w-[300px]"
+             tabindex="-1" aria-labelledby="drawer-right-label">
+            <h5 id="drawer-right-label"
+                class="inline-flex items-center mb-4 font-semibold text-primary text-2xl dark:text-gray-400">Ajouter un
+                agenda</h5>
+            <button type="button" data-drawer-hide="drawer-right-example" aria-controls="drawer-right-example"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-6 end-6 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white">
+                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close menu</span>
+            </button>
+            <div>
+                <form action="/agenda/creer" method="POST" class="flex flex-col gap-4">
+                    <div class="space-y-1.5">
+                        <label for="nom" class="text-secondary">Nom</label>
+                        <input type="text" name="nom" id="nom"
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                               required>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label for="description" class="text-secondary">Description</label>
+                        <textarea name="description" id="description"
+                                  class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                                  required></textarea>
+                    </div>
+
+                    <div>
+                        <label for="couleur" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Choisissez
+                            une couleur :</label>
+                        <select id="couleur" name="couleur"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                required>
+                            <option value="">Sélectionnez une couleur</option>
+                            <option value="0">Rouge</option>
+                            <option value="1">Bleu</option>
+                            <option value="2">Vert</option>
+                            <option value="3">Jaune</option>
+                            <option value="4">Noir</option>
+                            <option value="5">Blanc</option>
+                            <option value="6">Violet</option>
+                            <option value="7">Orange</option>
+                        </select>
+                    </div>
+
+                    <input class="hidden" type="hidden" id="createurEmail" name="createurEmail"
+                           value="<%= userEmailConnected %>" style="background-color: lightgrey;" readonly required>
+                    <button type="submit"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Créer
+                    </button>
+                </form>
+            </div>
+            <div class="mt-8 space-y-6">
+                <h2 class="text-primary text-2xl font-semibold">Importer un agenda</h2>
+                <form action="/agenda/import" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                               aria-describedby="file_input_help" id="file_input" type="file" accept="text/csv"
+                               name="file">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">Uniquement les
+                            fichiers CSV sont acceptés.</p>
+                    </div>
+                    <button type="submit"
+                            class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        Importer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <% if (agendasCrees.length > 0) { %>
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mt-8 max-h-[300px] h-full overflow-y-auto">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Nom
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Description
+                    </th>
+                    <th scope="col" class="px-6 py-3 max-w-16">
+                        Actions
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <% agendasCrees.forEach(agenda => { %>
+                <tr class="bg-white dark:bg-gray-800">
+                    <th scope="row"
+                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <%= agenda.nom %>
+                    </th>
+                    <td class="px-6 py-4">
+                        <%= agenda.description %>
+                    </td>
+                    <td class="px-6 py-4 w-[200px]">
+                        <button id="dropdownDefaultButton" data-dropdown-toggle="<%= agenda.id %>-dropdown"
+                                class="" type="button">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
+                                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                                <path d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z"
+                                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                                <path d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z"
+                                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+
+                        <div id="<%= agenda.id %>-dropdown"
+                             class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                aria-labelledby="dropdownDefaultButton">
+                                <li>
+                                    <a href="/rendezvous/<%= agenda.id %>"
+                                       class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voir</a>
+                                </li>
+                                <li>
+                                    <button class="flex w-full justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                            type="button" data-drawer-target="<%= agenda.id %>-edit-drawer"
+                                            data-drawer-show="<%= agenda.id %>-edit-drawer"
+                                            data-drawer-placement="right" aria-controls="<%= agenda.id %>-edit-drawer">
+                                        Modifier
+                                    </button>
+                                </li>
+                                <li>
+                                    <a href="/agenda/supprimer/<%= agenda._id %>"
+                                       class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Supprimer</a>
+                                </li>
+                                <li>
+                                    <a href="/agenda/export/<%= agenda._id %>"
+                                       class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Exporter</a>
+                                </li>
+                                <li>
+                                    <button data-modal-target="<%= agenda.id %>-share-modal"
+                                            data-modal-toggle="<%= agenda.id %>-share-modal"
+                                            class="w-full flex items-center justify-start px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-whit"
+                                            type="button">
+                                        Partager
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="<%= agenda.id %>-share-modal" tabindex="-1" aria-hidden="true"
+                             class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                            <div class="relative p-4 w-full max-w-2xl max-h-full">
+                                <!-- Modal content -->
+                                <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                    <!-- Modal header -->
+                                    <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                            Partager
+                                        </h3>
+                                        <button type="button"
+                                                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                                data-modal-hide="<%= agenda.id %>-share-modal">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                 fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                      stroke-linejoin="round" stroke-width="2"
+                                                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                            <span class="sr-only">Close modal</span>
+                                        </button>
+                                    </div>
+                                    <!-- Modal body -->
+                                    <form action="/agenda/<%= agenda.id %>/partager" class="flex flex-col gap-2"
+                                          method="POST">
+                                        <div class="p-4 md:p-5 space-y-4">
+                                            <input type="email"
+                                                   class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                                                   name="emailPartage" placeholder="Email de l'utilisateur" required>
+                                            <input type="hidden" name="userEmailConnected"
+                                                   value="<%= userEmailConnected %>">
+
+                                        </div>
+                                        <!-- Modal footer -->
+                                        <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                            <button data-modal-hide="<%= agenda.id %>-share-modal" type="submit"
+                                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                Partager
+                                            </button>
+                                            <button data-modal-hide="<%= agenda.id %>-share-modal" type="button"
+                                                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                                Annuler
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="<%= agenda.id %>-edit-drawer"
+                             class="fixed top-0 right-0 z-40 h-screen px-6 py-6 overflow-y-auto transition-transform translate-x-full bg-white max-w-xl w-full dark:bg-gray-800 min-w-[300px]"
+                             tabindex="-1" aria-labelledby="drawer-right-label">
+                            <h5 id="drawer-right-label"
+                                class="inline-flex items-center mb-4 font-semibold text-primary text-2xl dark:text-gray-400">
+                                Modifier l'agenda <%= agenda.nom %></h5>
+                            <button type="button" data-drawer-hide="<%= agenda.id %>-edit-drawer"
+                                    aria-controls="<%= agenda.id %>-edit-drawer"
+                                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-6 end-6 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                     viewBox="0 0 14 14">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                          stroke-width="2"
+                                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                </svg>
+                                <span class="sr-only">Close menu</span>
+                            </button>
+                            <div>
+                                <form action="/agenda/<%= agenda.id %>/modifier" method="POST"
+                                      class="flex flex-col gap-4">
+                                    <div class="space-y-1.5">
+                                        <label for="nom" class="text-secondary">Nom</label>
+                                        <input type="text" name="nom" id="nom"
+                                               value="<%= agenda.nom %>"
+                                               class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                                               required>
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        <label for="description" class="text-secondary">Description</label>
+                                        <textarea name="description" id="description"
+                                                  class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                                                  required><%= agenda.description %></textarea>
+                                    </div>
+
+                                    <input class="hidden" type="hidden" id="createurEmail" name="createurEmail"
+                                           value="<%= userEmailConnected %>" style="background-color: lightgrey;"
+                                           readonly required>
+                                    <button type="submit"
+                                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                        Créer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                    <% }) %>
+                </tbody>
+            </table>
+
+        <% } %>
+    </div>
+    </ul>
+</div>
+
+<div class="max-w-7xl mx-auto w-full mt-10 pb-8">
+    <h2 class="text-primary font-semibold text-3xl">Agendas partagés avec moi</h2>
+    <% if (agendasPartages.length > 0) { %>
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 mt-8">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Nom
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Description
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <% agendasPartages.forEach(agenda => { %>
+            <tr class="bg-white dark:bg-gray-800">
+                <th scope="row"
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <%= agenda.nom %>
+                </th>
+                <td class="px-6 py-4">
+                    <%= agenda.description %>
+                </td>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>Aucun agenda partagé.</p>
+    <% } %>
+</div>
 </body>
 </html>

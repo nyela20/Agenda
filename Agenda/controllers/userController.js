@@ -1,6 +1,6 @@
 const User = require('../models/user');
-const RendezVous = require('../models/rendezvous.js'); 
-const Agenda = require('../models/agenda.js'); 
+const RendezVous = require('../models/rendezvous.js');
+const Agenda = require('../models/agenda.js');
 const bcrypt = require('bcrypt'); // pour le mot de passe hasher
 // pour reset password via mail
 const nodemailer = require('nodemailer');
@@ -15,7 +15,7 @@ exports.createUser = async (req, res) => {
   try {
     const { name, email, password , confirmPassword } = req.body;
 
-    // validation mail 
+    // validation mail
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
     if (!emailRegex.test(email)) {
       return res.status(400).render('register', { error: 'Adresse email invalide.' });
@@ -36,7 +36,7 @@ exports.createUser = async (req, res) => {
 
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    
+
     // const user = new User(req.body);
     const user = new User({
       name,
@@ -44,7 +44,7 @@ exports.createUser = async (req, res) => {
       password: hashedPassword // Sauvegarder le mot de passe hashé
     });
     await user.save();
-    res.redirect('/users/login');
+    res.redirect('/');
     //res.status(201).send(user);
   } catch (err) {
     //res.status(400).send(err);
@@ -57,7 +57,7 @@ exports.loginUser = async (req , res) =>{
   try{
     const {email , password} = req.body;
     const user = await User.findOne({ email });
-    
+
     if( !user ){
       return res.status(400).render('login' ,{error: 'Utilisateur non trouvé '});
 
@@ -66,10 +66,11 @@ exports.loginUser = async (req , res) =>{
     if(!isMatch ){
       return res.status(400).render('login' ,{error: 'Mot de passe incorrect  '});
     }
-    
+
     // enregistrer le mail de l utilisateur connecte
     localStorage.setItem('userEmail', email);
-    
+    localStorage.setItem('userName', user.name);
+
     res.redirect('/agenda'); // rediger vers la page principale
   }catch(err){
     res.status(500).render('login', { error: err.message });
@@ -88,7 +89,7 @@ exports.getUsers = async (req, res) => {
 // Déconnexion d'un utilisateur
 exports.logoutUser = async (req, res) => {
   //Vide de localStorage sans vérifier l'email
-  localStorage.clear(); 
+  localStorage.clear();
   res.redirect('/');
 };
 
@@ -104,14 +105,14 @@ exports.getUserByMail = async (req, res) => {
 
 exports.updateUserByMail = async (req, res) => {
   try {
-    
+
     const{nom , email} = req.body;
     const oldMail = localStorage.getItem("userEmail");
-    
+
     await User.updateOne({"email":oldMail},{$set:{"nom":nom,"email":email}});
-    
+
     temp = await Agenda.find({"partages.email":oldMail});
-    
+
     for(let agenda of temp){
       await Agenda.updateOne({_id : agenda._id ,"partages.email":oldMail},{$set:{"partages.$.email":email}})
     }
@@ -133,7 +134,7 @@ const transporter = nodemailer.createTransport({
   host : process.env.MAIL_HOST ,
   port : process.env.MAIL_PORT,
   auth:{
-    user: process.env.MAIL_USER, 
+    user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
   }
 });
@@ -144,10 +145,10 @@ exports.forgotPassword = async (req , res) => {
   try {
     const email = req.body.email;
 
-    // generer un token 
+    // generer un token
     const token = crypto.randomBytes(32).toString('hex');
 
-    //chercher l'utilisateur et mettre à jour avec le token 
+    //chercher l'utilisateur et mettre à jour avec le token
     const user = await User.findOne({ email: email });
     if(!user){
       return res.render('forgot-password' ,{
@@ -157,10 +158,10 @@ exports.forgotPassword = async (req , res) => {
 
     user.resetPassWordToken = token;
     user.resetPassWordExpires =  Date.now() + ( 20 * 60 * 1000 ); // expirées dans 20 min
-    //save dans la base de données 
+    //save dans la base de données
     await user.save();
-    
-    
+
+
     // envoye le mail
     const resetURL = `http://localhost:3000/users/reset-password/${token}`;
     const mailOption = {
@@ -172,11 +173,11 @@ exports.forgotPassword = async (req , res) => {
     };
 
     await transporter.sendMail(mailOption);
-    res.render('forgot-password', { 
-      error: 'Un email de réinitialisation a été envoyé à votre adresse.' 
+    res.render('forgot-password', {
+      error: 'Un email de réinitialisation a été envoyé à votre adresse.'
     });
 
-    
+
   } catch (err) {
     res.render('forgot-password', { error: err.message });
   }
@@ -201,13 +202,13 @@ exports.getResetPassword = async (req , res) =>{
       token : req.params.token,
       linkExpired : false
     });
-    
+
   } catch (error) {
     res.render('reset-password', { error: err.message });
   }
 }
 
-// traite le nouveau mot de passe 
+// traite le nouveau mot de passe
 exports.postResetPassword = async (req , res ) =>{
   try {
 
@@ -215,17 +216,17 @@ exports.postResetPassword = async (req , res ) =>{
     const confirmPassword = req.body.confirmPassword;
 
     if(password.length < 6 ){
-      return res.render('reset-password' , 
-        { 
-          error: 'Le mot de passe doit contenir au moins 6 caractères.' 
+      return res.render('reset-password' ,
+        {
+          error: 'Le mot de passe doit contenir au moins 6 caractères.'
 
         });
-    } 
+    }
 
     if(password !==  confirmPassword ){
-      return res.render('reset-password' , 
-        { 
-          error: 'Les mots de passe ne correspondent pas.' 
+      return res.render('reset-password' ,
+        {
+          error: 'Les mots de passe ne correspondent pas.'
 
         });
     }
@@ -236,9 +237,9 @@ exports.postResetPassword = async (req , res ) =>{
     });
 
     if(!user){
-      return res.render('reset-password' , 
-        { 
-          error: 'Le token a expiré.' 
+      return res.render('reset-password' ,
+        {
+          error: 'Le token a expiré.'
 
         });
     }

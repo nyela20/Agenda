@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"  type="text/css" href="/stylesheets/styleAgendaMensuel.css">
+    <link rel="stylesheet"  type="text/css" href="/stylesheets/style.css">
     <title><%= mois + " " + date.getFullYear() %></title>
 </head>
 <body>
@@ -32,10 +32,10 @@
                         <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
                         <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
                         <label for="nomFiltre"> Nom : </label>
-                        <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
+                        <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>">
                         <br><br>
                         <label for="emailFiltre"> Créateur : </label>
-                        <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>"> 
+                        <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>">
                         <br><br>
                         <button type="submit"> Appliquer </button>
                     </form>
@@ -99,7 +99,7 @@
                 <br>
                 <!-- Navigation des semaines/mois/annee -->
                 <div class="nav-buttons">
-                    <% 
+                    <%
                         let moisPrecedent;
                         let anneePrecedent = anneeParametre;
                         if (moisParametre > 1) {
@@ -143,7 +143,7 @@
                         <input type="hidden" name="anneeParametre" value="<%= anneeSuivant %>" />
                         <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
                         <% if(nomFiltre) { %> <input type="hidden" name="nomFiltre" value="<%=nomFiltre%>"> <% } %>
-                        <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>        
+                        <% if(emailFiltre) { %> <input type="hidden" name="emailFiltre" value="<%=emailFiltre%>"> <% } %>
                         <button class="nav" type="submit">Mois Suivant</button>
                     </form>
                 </div>
@@ -162,20 +162,20 @@
                         <div class="day-label">Ven.</div>
                         <div class="day-label">Sam.</div>
                         <div class="day-label">Dim.</div>
-                    <% for (let hour = 0; hour < 24; hour++) { 
+                    <% for (let hour = 0; hour < 24; hour++) {
                 %>
                     <div class="hour-label"><%= (hour) + "h" %></div>
                     <%
                         const premierJourAffichage = (semaine - 1) * 7 - caseDepart;
                         for (let i = minval; i < maxval; i++) {
                              const jour = premierJourAffichage + i;
-                    %>  
+                    %>
                             <% if (jour >= 0 && jour < nombreJours) { %>
-                                <div class="day-cell"> <%= (hour == 0) ? jour + 1 : "" %> 
-                                    <% 
+                                <div class="day-cell"> <%= (hour == 0) ? jour + 1 : "" %>
+                                    <%
                                     // Parcours la liste des rendez-vous et affiche leurs attributs
-                                    rendezVousList.forEach(rendezvous => { 
-                                        %>                                                                                
+                                    rendezVousList.forEach(rendezvous => {
+                                        %>
                                             <% if(jour + 1 == rendezvous.dateRendezVous.getDate()){
                                                 if(hour == rendezvous.dateRendezVous.getHours()){ %>
                                                     <% let tailleRdvCell = -105 * (rendezvous.duree.heures-1) %>
@@ -199,23 +199,23 @@
                                                         <% } %>
                                                     </div>
                                                 <%}
-                                            }%> 
-                                        <% 
-                                        }); 
+                                            }%>
+                                        <%
+                                        });
                                     %>
-                                </div> 
+                                </div>
                             <% } else { %>
                                 <div class="day-cell-hidden"></div>
                             <% } %>
-                    <% 
+                    <%
                         } }
                     %>
-                <% 
-                minval = minval + 7; maxval = maxval + 7 ;} 
+                <%
+                minval = minval + 7; maxval = maxval + 7 ;}
                 %>
             </div>
         </div>
     </div>
-    
+
 </body>
 </html>

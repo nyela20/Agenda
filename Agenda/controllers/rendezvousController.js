@@ -1,5 +1,7 @@
-const RendezVous = require('../models/rendezvous.js'); 
-const Agenda = require('../models/agenda.js'); 
+const RendezVous = require('../models/rendezvous.js');
+const Agenda = require('../models/agenda.js');
+const Notification = require('../models/notification.js');
+const User = require('../models/user.js');
 
 // Fonction pour créer un rendez-vous et le sauvegarder dans la base de données
 exports.creerRendezVous = async (req, res) => {
@@ -14,15 +16,15 @@ exports.creerRendezVous = async (req, res) => {
       dureeMinutes,
       estRecurrent,
       typeRecurrence,
-      finRecurrence
+      finRecurrence,
     } = req.body;
-    
+
     const agenda = await Agenda.findById(req.params.agendaId);
 
 
     // creer un rdv Recurrence
 
-    if(estRecurrent === 'on' && typeRecurrence !== 'aucun'){
+    if (estRecurrent === 'on' && typeRecurrence !== 'aucun') {
       const dateDebut = new Date(dateRendezVous);
       const dateFin = new Date(finRecurrence + 'T23:59:59');
       // tableau qui contient tous les nouveaux rdv
@@ -30,19 +32,18 @@ exports.creerRendezVous = async (req, res) => {
 
       let dateActuelle = new Date(dateDebut);
 
-      while(dateActuelle <= dateFin){
+      while (dateActuelle <= dateFin) {
         const nouveauRendezVous = new RendezVous({
           nom,
           description,
-          dateRendezVous : new Date(dateActuelle),
+          dateRendezVous: new Date(dateActuelle),
           participants,
           createurEmail,
-          agenda: agenda ,
+          agenda: agenda,
           duree: {
-            heures: dureeHeures,
-            minutes: dureeMinutes
+            heures: dureeHeures, minutes: dureeMinutes
           },
-          couleur : agenda.couleur,
+          couleur: agenda.couleur,
           estRecurrent: true,
           typeRecurrence,
           finRecurrence: dateFin
@@ -51,7 +52,7 @@ exports.creerRendezVous = async (req, res) => {
 
         renfezVousRecurrents.push(nouveauRendezVous);
 
-        let nextDate = new Date(dateActuelle) ;
+        let nextDate = new Date(dateActuelle);
         switch (typeRecurrence) {
           case 'quotidien':
             nextDate.setDate(dateActuelle.getDate() + 1);
@@ -69,30 +70,20 @@ exports.creerRendezVous = async (req, res) => {
       }
 
       // sauvegarde les rdvs recurrents
-      const rendezVousSauvegardes = await Promise.all(
-        renfezVousRecurrents.map(rdv => rdv.save())
-      );
+      const rendezVousSauvegardes = await Promise.all(renfezVousRecurrents.map(rdv => rdv.save()));
 
       // ajoute les ids rdvs à l'agenda
-      await Agenda.findByIdAndUpdate(agenda._id,{
-        $push: {rendezVous: { $each: rendezVousSauvegardes.map(rdv => rdv._id) } }
+      await Agenda.findByIdAndUpdate(agenda._id, {
+        $push: {rendezVous: {$each: rendezVousSauvegardes.map(rdv => rdv._id)}}
       });
 
-    }else{
+    } else {
 
       // créer un nouveau rendez-vous
       const nouveauRendezVous = new RendezVous({
-        nom,
-        description,
-        dateRendezVous,
-        participants,
-        createurEmail,
-        agenda: agenda ,
-        duree: {
-          heures: dureeHeures,
-          minutes: dureeMinutes
-        },
-        couleur : agenda.couleur
+        nom, description, dateRendezVous, participants, createurEmail, agenda: agenda, duree: {
+          heures: dureeHeures, minutes: dureeMinutes
+        }, couleur: agenda.couleur
       });
 
       // sauvegarde
@@ -100,21 +91,19 @@ exports.creerRendezVous = async (req, res) => {
 
       // ajoute le rendez-vous à l'agenda correspondant
       await Agenda.findByIdAndUpdate(agenda._id, {
-        $push: { rendezVous: rendezVousSauvegarde._id }
+        $push: {rendezVous: rendezVousSauvegarde._id}
       });
     }
 
     // redirection
-    res.redirect('/rendezvous/'+agenda._id);
+    res.redirect('/rendezvous/' + agenda._id);
   } catch (error) {
     // Réponse erreur
     res.status(500).json({
-      message: 'Erreur lors de la création du rendez-vous ' + JSON.stringify(req.params),
-      error: error.message
+      message: 'Erreur lors de la création du rendez-vous ' + JSON.stringify(req.params), error: error.message
     });
   }
 };
-
 
 
 // Fonction pour afficher les rendez-vous d'un agenda
@@ -124,11 +113,14 @@ exports.afficherRendezVous = async (req, res) => {
     const agenda = await Agenda.findById(agendaId);
 
     const userConnected = localStorage.getItem("userEmail");
-    const agendas = await Agenda.find({ createurEmail: userConnected });
+    const userNameConnected = localStorage.getItem("userName");
+    const agendas = await Agenda.find({createurEmail: userConnected});
 
     const agendasPartages = await Agenda.find({
       "partages.email": userConnected
     });
+
+    const notifications = await Notification.find({user: await User.findOne({email: userConnected})});
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
@@ -137,13 +129,13 @@ exports.afficherRendezVous = async (req, res) => {
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
     let agendaIds = [agendaId]
     agendas.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
-    
+
     agendasPartages.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
@@ -152,15 +144,15 @@ exports.afficherRendezVous = async (req, res) => {
     const dateActuelle = new Date();
 
     let temp = req.query.weekDate;
-    if(temp != undefined){
+    if (temp != undefined) {
       temp2 = new Date(temp);
     }
-    
+
     let moisParametre;
     let anneeParametre;
     let nbsemaine = 0;
 
-    if(temp != undefined){
+    if (temp != undefined) {
 
       let nbjours = 0;
 
@@ -175,29 +167,29 @@ exports.afficherRendezVous = async (req, res) => {
       let dte = new Date(annee2, 1, 0).getDate();
       let premierJour = new Date(annee2, 0, 1).getDay();
 
-      if(premierJour != 1){
+      if (premierJour != 1) {
         let missingWeekDays;
-        if(premierJour == 0){
-          missingWeekDays = 1 - 7 ;
-        }else{
+        if (premierJour == 0) {
+          missingWeekDays = 1 - 7;
+        } else {
           missingWeekDays = 1 - premierJour;
         }
         nbjours = missingWeekDays;
         nbsemaine++;
       }
 
-      for(i = 0; i < semaine2 && mois2 < 12;i++){
+      for (i = 0; i < semaine2 && mois2 < 12; i++) {
         nbsemaine++;
         nbjours = nbjours + 7;
-        if( nbjours > dte){
+        if (nbjours > dte) {
           nbjours = nbjours - dte;
           mois2++;
-          dte = new Date(annee2,mois2,0).getDate();
+          dte = new Date(annee2, mois2, 0).getDate();
           nbsemaine = 1;
-        }else if(nbjours == dte){
+        } else if (nbjours == dte) {
           nbjours = 0;
           mois2++;
-          dte = new Date(annee2,mois2,0).getDate();
+          dte = new Date(annee2, mois2, 0).getDate();
           nbsemaine = 0;
         }
       }
@@ -205,25 +197,25 @@ exports.afficherRendezVous = async (req, res) => {
       moisParametre = mois2 - 1;
       anneeParametre = annee2;
 
-    }else{
+    } else {
       // la date et l'heure a afficher
-      moisParametre =  parseInt(req.query.moisParametre, 10);
-      if(isNaN(moisParametre)){ 
+      moisParametre = parseInt(req.query.moisParametre, 10);
+      if (isNaN(moisParametre)) {
         // moisParametre = 9; // octobre par defaut
-        moisParametre = dateActuelle.getMonth() ;
+        moisParametre = dateActuelle.getMonth();
       }
       anneeParametre = parseInt(req.query.anneeParametre, 10);
-      if(isNaN(anneeParametre)){ 
+      if (isNaN(anneeParametre)) {
         //anneeParametre = 2024; // par default
         anneeParametre = dateActuelle.getFullYear(); // année actuelle
       }
     }
-    
+
     let jourActuel = dateActuelle.getDate();
 
     //  debut et fin mois afffiché
-    const debutMois = new Date(anneeParametre , moisParametre , 1);
-    const finMois = new Date(anneeParametre , moisParametre + 1 , 0 ,23,59,59);
+    const debutMois = new Date(anneeParametre, moisParametre, 1);
+    const finMois = new Date(anneeParametre, moisParametre + 1, 0, 23, 59, 59);
 
     // appliquer les filtres
     const nomFiltre = req.query.nomFiltre;
@@ -231,25 +223,16 @@ exports.afficherRendezVous = async (req, res) => {
 
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
-      agenda : {$in : agendaIds},
-      $or: [
-        // rdvs non récurrents
+      agenda: {$in: agendaIds}, $or: [// rdvs non récurrents
         {
-          estRecurrent: false,
-          dateRendezVous: {
-            $gte: debutMois,
-            $lte: finMois
+          estRecurrent: false, dateRendezVous: {
+            $gte: debutMois, $lte: finMois
           }
-        },
-        // rdv récurrents =
+        }, // rdv récurrents =
         {
-          estRecurrent: true,
-          dateRendezVous: { $lte: finMois },
-          finRecurrence: { $gte: debutMois }
-        }
-      ],
-      ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
-      ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case
+          estRecurrent: true, dateRendezVous: {$lte: finMois}, finRecurrence: {$gte: debutMois}
+        }], ...(nomFiltre ? {nom: {$regex: "^" + nomFiltre + "$", $options: "i"}} : {}), // i insensible a la case
+      ...(emailFiltre ? {createurEmail: {$regex: "^" + emailFiltre + "$", $options: "i"}} : {}) // i insensible a la case
     });
 
     // filtrage les rdvs
@@ -280,7 +263,7 @@ exports.afficherRendezVous = async (req, res) => {
     const date = new Date(anneeParametre, moisParametre, 1);
 
     // le mois courant en français en utilisant le nom long du mois
-    const mois = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+    const mois = new Intl.DateTimeFormat('fr-FR', {month: 'long'}).format(date);
 
     // le nombre total de jours dans le mois courant
     const nombreJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -295,10 +278,27 @@ exports.afficherRendezVous = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = (temp != undefined) ? nbsemaine : parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezvous', {emailFiltre, nomFiltre, req, agenda, date, mois, nombreJours, caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages });
+    res.render('rendezvous', {
+      emailFiltre,
+      nomFiltre,
+      req,
+      agenda,
+      date,
+      mois,
+      nombreJours,
+      caseDepart,
+      semaine,
+      moisParametre,
+      anneeParametre,
+      rendezVousList,
+      agendas,
+      agendasPartages,
+      notifications,
+      userNameConnected
+    });
 
   } catch (error) {
-    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' + error.message + " " + JSON.stringify(req.params));
   }
 };
 
@@ -308,7 +308,7 @@ exports.afficherRendezVousJour = async (req, res) => {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
     const userConnected = localStorage.getItem("userEmail");
-    const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
+    const agendas = await Agenda.find({createurEmail: agenda.createurEmail});
 
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
@@ -321,17 +321,17 @@ exports.afficherRendezVousJour = async (req, res) => {
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
     let agendaIds = [agendaId]
     agendas.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
 
     agendasPartages.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
-    
+
     //date de systeme actuelle
     const dateActuelle = new Date();
 
@@ -343,21 +343,21 @@ exports.afficherRendezVousJour = async (req, res) => {
     let numJourActuel;
     let jourParametre2;
 
-    if(temp != undefined){
+    if (temp != undefined) {
       temp2 = new Date(temp);
       moisParametre = parseInt(temp2.getMonth());
       anneeParametre = parseInt(temp2.getFullYear());
       numJourActuel = parseInt(temp2.getDate());
 
-    }else if(temp == undefined){
+    } else if (temp == undefined) {
       // la date et l'heure a afficher
-      moisParametre =  parseInt(req.query.moisParametre, 10);
-      if(isNaN(moisParametre)){ 
+      moisParametre = parseInt(req.query.moisParametre, 10);
+      if (isNaN(moisParametre)) {
         // moisParametre = 9; // octobre par defaut
-        moisParametre = dateActuelle.getMonth() ;
+        moisParametre = dateActuelle.getMonth();
       }
       anneeParametre = parseInt(req.query.anneeParametre, 10);
-      if(isNaN(anneeParametre)){ 
+      if (isNaN(anneeParametre)) {
         //anneeParametre = 2024; // par default
         anneeParametre = dateActuelle.getFullYear(); // année actuelle
       }
@@ -368,8 +368,8 @@ exports.afficherRendezVousJour = async (req, res) => {
     let jourActuel = dateActuelle.getDate();
 
     //  debut et fin mois afffiché
-    const debutMois = new Date(anneeParametre , moisParametre , 1);
-    const finMois = new Date(anneeParametre , moisParametre + 1 , 0 ,23,59,59);
+    const debutMois = new Date(anneeParametre, moisParametre, 1);
+    const finMois = new Date(anneeParametre, moisParametre + 1, 0, 23, 59, 59);
 
     // appliquer les filtres
     const nomFiltre = req.query.nomFiltre;
@@ -377,25 +377,16 @@ exports.afficherRendezVousJour = async (req, res) => {
 
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
-      agenda : {$in : agendaIds},
-      $or: [
-        // rdvs non récurrents
+      agenda: {$in: agendaIds}, $or: [// rdvs non récurrents
         {
-          estRecurrent: false,
-          dateRendezVous: {
-            $gte: debutMois,
-            $lte: finMois
+          estRecurrent: false, dateRendezVous: {
+            $gte: debutMois, $lte: finMois
           }
-        },
-        // rdv récurrents =
+        }, // rdv récurrents =
         {
-          estRecurrent: true,
-          dateRendezVous: { $lte: finMois },
-          finRecurrence: { $gte: debutMois }
-        }
-      ],
-      ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
-      ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
+          estRecurrent: true, dateRendezVous: {$lte: finMois}, finRecurrence: {$gte: debutMois}
+        }], ...(nomFiltre ? {nom: {$regex: "^" + nomFiltre + "$", $options: "i"}} : {}), // i insensible a la case
+      ...(emailFiltre ? {createurEmail: {$regex: "^" + emailFiltre + "$", $options: "i"}} : {}) // i insensible a la case
     });
 
     // filtrage les rdvs
@@ -424,14 +415,10 @@ exports.afficherRendezVousJour = async (req, res) => {
     });
 
 
-
-
-
-
     const date = new Date(anneeParametre, moisParametre, 1);
 
     // le mois courant en français en utilisant le nom long du mois
-    const mois = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+    const mois = new Intl.DateTimeFormat('fr-FR', {month: 'long'}).format(date);
 
     // le nombre total de jours dans le mois d'avant le mois courant
     const nombreJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -447,29 +434,47 @@ exports.afficherRendezVousJour = async (req, res) => {
     const caseDepart = (premierJour === 0) ? 6 : premierJour - 1;
 
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
-    const semaine = (temp != undefined) ? ( ( parseInt(temp2.getDate()) ) / 7 ) : parseInt(req.query.semaine, 10) || 1;
-    
-    if(isNaN(numJourActuel)){
+    const semaine = (temp != undefined) ? ((parseInt(temp2.getDate())) / 7) : parseInt(req.query.semaine, 10) || 1;
+
+    if (isNaN(numJourActuel)) {
       numJourActuel = 1;
     }
     //gère la valeur de Parametre2 pour l'affichage du nom des jours lorsqu'on change avec la sélection de jours
-    if(temp != undefined){
+    if (temp != undefined) {
       jourParametre2 = parseInt(temp2.getDate());
-      if(jourParametre2 > 6){
+      if (jourParametre2 > 6) {
         jourParametre2 = ((jourParametre2 - caseDepart) % 7);
-      }else{
-        if( ( ((jourParametre2 + caseDepart) % 7) - 1 ) < 0){
-          jourParametre2 = 7 + ( ((jourParametre2 + caseDepart) % 7) - 1 );
-        }else{
-          jourParametre2 = ( ((jourParametre2 + caseDepart) % 7) - 1 );
+      } else {
+        if ((((jourParametre2 + caseDepart) % 7) - 1) < 0) {
+          jourParametre2 = 7 + (((jourParametre2 + caseDepart) % 7) - 1);
+        } else {
+          jourParametre2 = (((jourParametre2 + caseDepart) % 7) - 1);
         }
       }
     }
 
-    res.render('rendezvousjour', {agendasPartages, nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas , jourParametre2 , numJourActuel});
+    res.render('rendezvousjour', {
+      agendasPartages,
+      nomFiltre,
+      emailFiltre,
+      req,
+      agenda,
+      date,
+      mois,
+      nombreJours,
+      nombreJours2,
+      caseDepart,
+      semaine,
+      moisParametre,
+      anneeParametre,
+      rendezVousList,
+      agendas,
+      jourParametre2,
+      numJourActuel
+    });
 
   } catch (error) {
-    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' + error.message + " " + JSON.stringify(req.params));
   }
 };
 
@@ -480,10 +485,10 @@ exports.afficherRendezVousMois = async (req, res) => {
     //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
 
     const userConnected = localStorage.getItem("userEmail");
-    const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
+    const agendas = await Agenda.find({createurEmail: agenda.createurEmail});
 
-    const agendasPartages = await Agenda.find({ 
-      "partages.email": userConnected 
+    const agendasPartages = await Agenda.find({
+      "partages.email": userConnected
     });
 
     if (!agenda) {
@@ -493,13 +498,13 @@ exports.afficherRendezVousMois = async (req, res) => {
     // recuperer les rendezvous des autres agendas passer en parametre (s il y en a)
     let agendaIds = [agendaId]
     agendas.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
 
     agendasPartages.forEach(agenda => {
-      if(req.query[agenda.nom]){
+      if (req.query[agenda.nom]) {
         agendaIds.push(agenda.id)
       }
     });
@@ -512,19 +517,19 @@ exports.afficherRendezVousMois = async (req, res) => {
     let moisParametre;
     let anneeParametre;
 
-    if(temp != undefined){
+    if (temp != undefined) {
       valeurs = temp.split('-');
       anneeParametre = parseInt(valeurs[0]);
       moisParametre = (parseInt(valeurs[1]) - 1);
-    }else{
+    } else {
       // la date et l'heure a afficher
-      moisParametre =  parseInt(req.query.moisParametre, 10);
-      if(isNaN(moisParametre)){ 
+      moisParametre = parseInt(req.query.moisParametre, 10);
+      if (isNaN(moisParametre)) {
         // moisParametre = 9; // octobre par defaut
-        moisParametre = dateActuelle.getMonth() ;
+        moisParametre = dateActuelle.getMonth();
       }
       anneeParametre = parseInt(req.query.anneeParametre, 10);
-      if(isNaN(anneeParametre)){ 
+      if (isNaN(anneeParametre)) {
         //anneeParametre = 2024; // par default
         anneeParametre = dateActuelle.getFullYear(); // année actuelle
       }
@@ -533,8 +538,8 @@ exports.afficherRendezVousMois = async (req, res) => {
     let jourActuel = dateActuelle.getDate();
 
     //  debut et fin mois afffiché
-    const debutMois = new Date(anneeParametre , moisParametre , 1);
-    const finMois = new Date(anneeParametre , moisParametre + 1 , 0 ,23,59,59);
+    const debutMois = new Date(anneeParametre, moisParametre, 1);
+    const finMois = new Date(anneeParametre, moisParametre + 1, 0, 23, 59, 59);
 
     // appliquer les filtres
     const nomFiltre = req.query.nomFiltre;
@@ -542,26 +547,17 @@ exports.afficherRendezVousMois = async (req, res) => {
 
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
-      agenda : {$in : agendaIds},
-      $or: [
-        // rdvs non récurrents
+      agenda: {$in: agendaIds}, $or: [// rdvs non récurrents
         {
-          estRecurrent: false,
-          dateRendezVous: {
-            $gte: debutMois,
-            $lte: finMois
+          estRecurrent: false, dateRendezVous: {
+            $gte: debutMois, $lte: finMois
           }
-        },
-        // rdv récurrents =
+        }, // rdv récurrents =
         {
-          estRecurrent: true,
-          dateRendezVous: { $lte: finMois },
-          finRecurrence: { $gte: debutMois }
-        }
-      ],
-      ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
-      ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
-    
+          estRecurrent: true, dateRendezVous: {$lte: finMois}, finRecurrence: {$gte: debutMois}
+        }], ...(nomFiltre ? {nom: {$regex: "^" + nomFiltre + "$", $options: "i"}} : {}), // i insensible a la case
+      ...(emailFiltre ? {createurEmail: {$regex: "^" + emailFiltre + "$", $options: "i"}} : {}) // i insensible a la case
+
     });
 
     // filtrage les rdvs
@@ -593,7 +589,7 @@ exports.afficherRendezVousMois = async (req, res) => {
     const date = new Date(anneeParametre, moisParametre, 1);
 
     // le mois courant en français en utilisant le nom long du mois
-    const mois = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+    const mois = new Intl.DateTimeFormat('fr-FR', {month: 'long'}).format(date);
 
     // le nombre total de jours dans le mois d'avant le mois courant
     const nombreJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -611,17 +607,33 @@ exports.afficherRendezVousMois = async (req, res) => {
     // récupère le numéro de la semaine à partir des paramètres de requête, ou utilise 1 par défaut si aucun paramètre n'est fourni
     const semaine = parseInt(req.query.semaine, 10) || 1;
 
-    res.render('rendezvousmois', {nomFiltre, emailFiltre, req, agenda, date, mois, nombreJours, nombreJours2 , caseDepart, semaine, moisParametre, anneeParametre, rendezVousList, agendas, agendasPartages});
+    res.render('rendezvousmois', {
+      nomFiltre,
+      emailFiltre,
+      req,
+      agenda,
+      date,
+      mois,
+      nombreJours,
+      nombreJours2,
+      caseDepart,
+      semaine,
+      moisParametre,
+      anneeParametre,
+      rendezVousList,
+      agendas,
+      agendasPartages
+    });
 
   } catch (error) {
-    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' +  error.message + " " + JSON.stringify(req.params));
+    res.status(500).send('Erreur lors de la récupération des rendez-vous : ' + error.message + " " + JSON.stringify(req.params));
   }
 };
 
 //supprimer un rendez vous
 exports.supprimerRendezVous = async (req, res) => {
-  try{
-  
+  try {
+
     if (req.body.recurrence) {
       const rendezVous = await RendezVous.findById(req.params.rendezvousId);
 
@@ -629,20 +641,16 @@ exports.supprimerRendezVous = async (req, res) => {
         return res.status(404).send('Rendez-vous non trouvé');
       }
 
-      const dateCreationStart = new Date(
-        Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000
-      );
+      const dateCreationStart = new Date(Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000);
       const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
 
       // suppression avec recurrence
       await RendezVous.deleteMany({
         dateCreation: {
-          $gte: dateCreationStart,
-          $lt: dateCreationEnd    
-        },
-        agenda: rendezVous.agenda
+          $gte: dateCreationStart, $lt: dateCreationEnd
+        }, agenda: rendezVous.agenda
       });
-    
+
     } else {
       //suppression seule
       await RendezVous.findByIdAndDelete(req.params.rendezvousId);
@@ -651,7 +659,7 @@ exports.supprimerRendezVous = async (req, res) => {
     res.redirect('/rendezvous/' + req.params.agendaId);
 
   } catch (error) {
-    res.status(501).send('Erreur lors de la supression du rendez-vous : ' +  error.message);
+    res.status(501).send('Erreur lors de la supression du rendez-vous : ' + error.message);
   }
 
 };
@@ -663,41 +671,32 @@ exports.accepterRendezVous = async (req, res, next) => {
     const agendaId = req.params.agendaId;
     const rendezvous = await RendezVous.findById(rendezvousId);
 
-     // mis a jour de tout les rdvs recurrents
-     if(req.body.recurrence){
-      
+    // mis a jour de tout les rdvs recurrents
+    if (req.body.recurrence) {
+
       // récupere tous les rdvs recurrent associe
-      const dateCreationStart = new Date(
-        Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000
-      );
+      const dateCreationStart = new Date(Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000);
       const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
 
       const allredvrec = await RendezVous.find({
         dateCreation: {
-          $gte: dateCreationStart,
-          $lt: dateCreationEnd
-        },
-        agenda: rendezvous.agenda
+          $gte: dateCreationStart, $lt: dateCreationEnd
+        }, agenda: rendezvous.agenda
       });
-      
-      const allRdvIds = allredvrec.map(rdv => rdv._id);
-      
-      await RendezVous.updateMany(
-        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
-        {  $set: {  refuse : false, accepte : true } }
-      );
 
-    }else{
+      const allRdvIds = allredvrec.map(rdv => rdv._id);
+
+      await RendezVous.updateMany({_id: {$in: allRdvIds}}, // Filtrer par les IDs des rendez-vous
+          {$set: {refuse: false, accepte: true}});
+
+    } else {
       // mis a jour de un seul
-      await RendezVous.updateOne(
-        { _id: rendezvous._id }, 
-        {  $set: {  refuse : false, accepte : true } }
-      );
+      await RendezVous.updateOne({_id: rendezvous._id}, {$set: {refuse: false, accepte: true}});
     }
 
     res.redirect(`/rendezvous/${agendaId}`);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
+    res.status(500).json({message: 'Erreur participer rendezvous ', error: error.message});
   }
 };
 
@@ -708,42 +707,32 @@ exports.refuserRendezVous = async (req, res, next) => {
     const rendezvous = await RendezVous.findById(rendezvousId);
 
     // mis a jour de tout les rdvs recurrents
-    if(req.body.recurrence){
-      
+    if (req.body.recurrence) {
+
       // récupere tous les rdvs recurrent associe
-      const dateCreationStart = new Date(
-        Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000
-      );
+      const dateCreationStart = new Date(Math.floor(rendezvous.dateCreation.getTime() / 1000) * 1000);
       const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
 
       const allredvrec = await RendezVous.find({
         dateCreation: {
-          $gte: dateCreationStart,
-          $lt: dateCreationEnd
-        },
-        agenda: rendezvous.agenda
+          $gte: dateCreationStart, $lt: dateCreationEnd
+        }, agenda: rendezvous.agenda
       });
-      
+
       const allRdvIds = allredvrec.map(rdv => rdv._id);
-      
-      await RendezVous.updateMany(
-        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
-        {  $set: {  refuse : true, accepte : false } }
-      );
 
-    }else{
+      await RendezVous.updateMany({_id: {$in: allRdvIds}}, // Filtrer par les IDs des rendez-vous
+          {$set: {refuse: true, accepte: false}});
+
+    } else {
       // mis a jour de un seul
-      await RendezVous.updateOne(
-        { _id: rendezvous._id }, 
-        {  $set: {  refuse : true, accepte : false } }
-      );
+      await RendezVous.updateOne({_id: rendezvous._id}, {$set: {refuse: true, accepte: false}});
     }
-
 
 
     res.redirect(`/rendezvous/${agendaId}`);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur participer rendezvous ', error: error.message });
+    res.status(500).json({message: 'Erreur participer rendezvous ', error: error.message});
   }
 };
 
@@ -757,77 +746,57 @@ exports.getRendezVousById = async (req) => {
 
     // Vérifier si le rendez-vous existe
     if (!rendezVous) {
-      return { error: 'Rendez-vous non trouvé' };  // Renvoie l'erreur
+      return {error: 'Rendez-vous non trouvé'};  // Renvoie l'erreur
     }
 
     // Renvoie le rendez-vous trouvé
     return rendezVous;
   } catch (error) {
     console.error(error);
-    return { error: 'Erreur serveur, veuillez réessayer plus tard.' };  // Renvoie l'erreur
+    return {error: 'Erreur serveur, veuillez réessayer plus tard.'};  // Renvoie l'erreur
   }
 };
 
 // fonction pour modifier un rendez-vous
 exports.modifierRendezVous = async (req, res) => {
   try {
-    const { 
-      nom, 
-      couleur, 
-      description,
-      dateRendezVous, 
-      dureeHeures,
-      dureeMinutes, 
-      typeRecurrence, 
-      finRecurrence,
-      recurrence
+    const {
+      nom, couleur, description, dateRendezVous, dureeHeures, dureeMinutes, typeRecurrence, finRecurrence, recurrence
     } = req.body;
 
     const rendezVous = await RendezVous.findById(req.params.rendezvousId);
     if (!rendezVous) {
-      return res.status(404).json({ message: 'Rendez-vous non trouvé' });
+      return res.status(404).json({message: 'Rendez-vous non trouvé'});
     }
 
     // modification par récurrence
-    if(recurrence){
+    if (recurrence) {
 
       // récupere tous les rdvs recurrent associe
-      const dateCreationStart = new Date(
-        Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000
-      );
+      const dateCreationStart = new Date(Math.floor(rendezVous.dateCreation.getTime() / 1000) * 1000);
       const dateCreationEnd = new Date(dateCreationStart.getTime() + 1000);
 
       const allredvrec = await RendezVous.find({
         dateCreation: {
-          $gte: dateCreationStart,
-          $lt: dateCreationEnd
-        },
-        agenda: rendezVous.agenda
+          $gte: dateCreationStart, $lt: dateCreationEnd
+        }, agenda: rendezVous.agenda
       });
-      
+
       // Extraire les IDs des rendez-vous pour les utiliser dans le filtre de `updateMany`
       const allRdvIds = allredvrec.map(rdv => rdv._id);
-      
+
       // Modification des champs nom, description, durée heure, durée minutes
-      await RendezVous.updateMany(
-        { _id: { $in: allRdvIds } }, // Filtrer par les IDs des rendez-vous
-        { 
-          $set: {
-            nom: nom || rendezVous.nom,
-            description: description || rendezVous.description,
-            duree: {
-              heures: dureeHeures || rendezVous.duree.heures,
-              minutes: dureeMinutes || rendezVous.duree.minutes
-            },
-            couleur: couleur || rendezVous.couleur,
-          }
-        }
-      );
+      await RendezVous.updateMany({_id: {$in: allRdvIds}}, // Filtrer par les IDs des rendez-vous
+          {
+            $set: {
+              nom: nom || rendezVous.nom, description: description || rendezVous.description, duree: {
+                heures: dureeHeures || rendezVous.duree.heures, minutes: dureeMinutes || rendezVous.duree.minutes
+              }, couleur: couleur || rendezVous.couleur,
+            }
+          });
 
       // modification de la date de début du rendez-vous, la date de fin et le type de récurrence (decaler tout les rdvs)
-      if (new Date(dateRendezVous).getTime()  !== new Date(rendezVous.dateRendezVous).getTime() || 
-      new Date(finRecurrence + 'T23:59:59').getTime() !== new Date(rendezVous.finRecurrence).getTime() || 
-      typeRecurrence !== rendezVous.typeRecurrence) {
+      if (new Date(dateRendezVous).getTime() !== new Date(rendezVous.dateRendezVous).getTime() || new Date(finRecurrence + 'T23:59:59').getTime() !== new Date(rendezVous.finRecurrence).getTime() || typeRecurrence !== rendezVous.typeRecurrence) {
         req.body.createurEmail = rendezVous.createurEmail;
         req.body.participants = rendezVous.participants;
         req.body.agenda = rendezVous.agenda;
@@ -835,40 +804,30 @@ exports.modifierRendezVous = async (req, res) => {
         req.body.refuse = rendezVous.refuse;
         req.body.estRecurrent = 'on';
         req.body.dateCreation = rendezVous.dateCreation;
-        
+
         await RendezVous.deleteMany({
-          agenda: rendezVous.agenda,
-          dateCreation: {
-            $gte: dateCreationStart,
-            $lt: dateCreationEnd
+          agenda: rendezVous.agenda, dateCreation: {
+            $gte: dateCreationStart, $lt: dateCreationEnd
           }
         });
-        await this.creerRendezVous(req, res);     
-        return;    
+        await this.creerRendezVous(req, res);
+        return;
       }
-    }
-    else {
+    } else {
 
       // modification du rendez-vous seul
-      await RendezVous.updateOne(
-        { _id: rendezVous._id }, // Filtrer par ID du rendez-vous
-        { 
-          $set: {
-            nom: nom || rendezVous.nom,
-            description: description || rendezVous.description,
-            duree: {
-              heures: dureeHeures || rendezVous.duree.heures,
-              minutes: dureeMinutes || rendezVous.duree.minutes
-            },
-            couleur: couleur || rendezVous.couleur,
-            dateRendezVous: dateRendezVous || rendezVous.dateRendezVous
-          }
-        }
-      );
+      await RendezVous.updateOne({_id: rendezVous._id}, // Filtrer par ID du rendez-vous
+          {
+            $set: {
+              nom: nom || rendezVous.nom, description: description || rendezVous.description, duree: {
+                heures: dureeHeures || rendezVous.duree.heures, minutes: dureeMinutes || rendezVous.duree.minutes
+              }, couleur: couleur || rendezVous.couleur, dateRendezVous: dateRendezVous || rendezVous.dateRendezVous
+            }
+          });
     }
 
     res.redirect('/rendezvous/' + req.params.agendaId);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
+    res.status(500).json({message: 'Erreur lors de la modification du rendez-vous', error: error.message});
   }
 };

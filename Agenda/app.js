@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var app = express();
+require('./utils/date');
 
 // local storage
 var LocalStorage = require('node-localstorage').LocalStorage;
@@ -12,7 +13,7 @@ localStorage = new LocalStorage('./scratch');
 // Connexion à MongoDB
 const mongoose = require('mongoose');
 require('dotenv').config();
-mongoose.connect("mongodb://localhost:27017/Agenda", {
+mongoose.connect("mongodb://root:example@localhost:27017/Agenda?authSource=admin", {
 }).then(() => {
   console.log('Connected to MongoDB');
 }).catch(err => {
@@ -33,14 +34,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 const usersRouter = require('./routes/users');
 var indexRouter = require('./routes/index');
 const agendaRouter = require('./routes/agenda');
-const rendezVousRouter = require('./routes/rendezvous'); 
+const rendezVousRouter = require('./routes/rendezvous');
 
 
 // utiliser les routes ici
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/agenda', agendaRouter);
-app.use('/rendezvous', rendezVousRouter); 
+app.use('/rendezvous', rendezVousRouter);
 
 // pour le css
 

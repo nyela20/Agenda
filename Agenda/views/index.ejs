@@ -4,25 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
 </head>
 <body>
-    <div style="display: contents; gap: 50px; display: inline-grid; gap: 100px;">
-        <div>
-            <h1 style="color:white; font-family: sans-serif;">
-                "Organisez votre vie facilement : des agendas sur mesure, créés juste pour vous, avec notre application Agenda"
-            </h1>
-        </div>
-        <div class="container-home-page" style="place-self: center;">
-            <h1><%= title %></h1>
-            <p>Welcome to <%= title %></p>
-            <form action="/users/login" method="GET">
-                <button type="submit">Se connecter</button>
+<main class="flex h-full">
+    <div class="w-1/2 flex flex-col items-center justify-center">
+        <div class="max-w-sm w-full">
+            <div class="space-y-3 w-full">
+                <h1 class="text-3xl font-semibold text-primary"><%= title %></h1>
+                <p class="text-tertiary font-normal">Welcome to <%= title %></p>
+            </div>
+            <form action="/users/login" method="post" class="w-full mt-8 space-y-5">
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="error-message">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <div class="space-y-1.5">
+                    <label for="email" class="text-secondary">Email</label>
+                    <input class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                           type="email" name="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="space-y-1.5">
+                    <label for="password" class="text-secondary">Password</label>
+                    <input class="w-full px-3.5 py-2.5 rounded-lg border border-primary placeholder-primary"
+                           type="password" name="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="flex items-center justify-end">
+                    <a href="/users/forgot-password" class="font-semibold text-sm text-blue-600">Mot de passe oublié ?</a>
+                </div>
+
+                <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="submit">Se connecter
+                </button>
             </form>
-            <form action="/users/register" method="GET">
-                <button type="submit">Créer un compte</button>
-            </form>
+
+            <div class="flex items-center justify-center mt-8 gap-1">
+                Vous n'avez pas de compte ?<a href="/users/register" class="text-blue-600 font-semibold">Inscrivez-vous
+                    ici</a>
+            </div>
         </div>
     </div>
+    <div class="w-1/2 flex flex-col items-center justify-center px-8 bg-[#F2F4F7] m-6 rounded-lg">
+        <h1 class="text-3xl font-medium max-w-xl text-center">
+            Organisez votre vie facilement : des agendas sur mesure, créés juste pour vous, avec notre application
+            Agenda
+        </h1>
+    </div>
+</main>
 </body>
 </html>

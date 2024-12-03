@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleRegister.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/style.css">
     <title><%= title %></title>
 </head>
 <body>
@@ -23,7 +23,7 @@
 
         <label for="dureeMinutes">(minutes) :</label>
         <input type="number" id="dureeMinutes" name="dureeMinutes" min="0" value="0" required><br><br>
-        
+
         <label style="visibility: hidden;" for="createurEmail">Createur :</label>
         <input name="createurEmail" value="<%= userEmailConnected %>" style="visibility: hidden;" readonly required> <br>
 
@@ -33,7 +33,7 @@
             <label class="all_recurence_label" for="estRecurrent">Rendez-vous récurrent :</label>
         </div>
         <br>
-        
+
         <div class="form-group" id="optionsRecurrence">
             <label for="typeRecurrence">Type de récurrence :</label>
             <select id="typeRecurrence" name="typeRecurrence">
@@ -43,7 +43,7 @@
                 <option value="mensuel">Chaque mois</option>
             </select>
             <br><br>
-        
+
             <div class="form-group">
                 <label for="finRecurrence">Date de fin de récurrence :</label>
                 <input type="date" id="finRecurrence" name="finRecurrence">
@@ -68,7 +68,7 @@
             const optionsRecurrence = document.getElementById('optionsRecurrence');
             const typeRecurrence = document.getElementById('typeRecurrence');
             const finRecurrence = document.getElementById('finRecurrence');
-            
+
             if (this.checked) {
                 optionsRecurrence.style.display = 'block';
                 typeRecurrence.required = true;
@@ -125,7 +125,7 @@
         heuresInput.addEventListener("change", () => { ajusterDureeMaximale(false, true, false); });
         minutesInput.addEventListener("change", () => { ajusterDureeMaximale(false, false, true);});
         dateInput.addEventListener("change", () =>{ ajusterDureeMaximale(true, false, false);});
-        
+
         // gestion de la soumission du formulaire
         document.getElementById('createrendezvous').addEventListener('submit', function(event) {
             const heures = parseInt(heuresInput.value);
