@@ -280,8 +280,8 @@ exports.bloquerEmailUtilisateur = async (req , res) =>{
       let nbreturn = await User.findOne({"email" : emails2[i] }).count();
       // console.log(nbreturn);
     
-      if(nbreturn > 0 && emailsRegex.test(emails2[i]) && !userData.blocked.includes(emails2[i])){
-        console.log(emails2[i]);
+      if(nbreturn > 0 && emailsRegex.test(emails2[i]) && !userData.blocked.includes(emails2[i]) && emails2[i] != userData.email){
+        // console.log(emails2[i]);
         await User.updateOne({"email":email},{$push:{"blocked":emails2[i]}});
 
         for(let agenda of allAgendas){
@@ -350,9 +350,33 @@ exports.bloquerEmailUtilisateur = async (req , res) =>{
 
     
 
-    res.render('compte' , {title : 'Votre compte', userData});
+    res.redirect('/users/compte');
     console.log("après render");
     
+  } catch (err) {
+    console.log(err);
+    res.status(500).send(err);
+  }
+}
+
+exports.unblockUser = async (req , res) =>{
+  try {
+    const userConnectedEmail = req.body.userConnectedEmail;
+    const blockedUserEmail = req.body.blockedUserEmail;
+
+    userConnected = await User.find({"email" : userConnectedEmail});
+    console.log(userConnectedEmail,userConnected[0].blocked,blockedUserEmail);
+    let index = userConnected[0].blocked.indexOf(blockedUserEmail);
+
+    if(userConnected[0].blocked.includes(blockedUserEmail)){
+      if(index != -1){
+        userConnectedBlockedTab = userConnected[0].blocked;
+        userConnectedBlockedTab.splice(index,1);
+        await User.updateOne({"email" : userConnectedEmail},{$set:{"blocked":userConnectedBlockedTab}});
+        res.redirect('/users/compte');
+      }
+    }
+
   } catch (err) {
     console.log(err);
     res.status(500).send(err);

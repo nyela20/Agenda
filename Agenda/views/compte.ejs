@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleRegister.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleCompte.css">
     <title><%= title %></title>
 </head>
 <body>
@@ -41,6 +41,29 @@
         </form>
         <br>
         <a href="/agenda"><button>Retour</button></a>
+        <div>
+            <ul class="agendaListUL">
+                <% for(i = 0;i < userData.blocked.length ;i++){%>
+                    <li class="agendaList">
+                        <%= userData.blocked[i] %><br>
+                        <div class="partage-form">
+                            <form action="/users/compte/debloquerutilisateurs" method="POST">
+                                <input type="hidden" name="userConnectedEmail" value="<%= userData.email %>">
+                                <input type="hidden" name="blockedUserEmail" value="<%=userData.blocked[i]%>">
+                                <button type="submit">Débloquer</button>
+                            </form>
+                            <% if (typeof error !== 'undefined' && error) { %>
+                                <div class="error-message">
+                                    <%= error %>
+                                </div>
+                            <% } %>
+                            <br>
+                        </div>
+        
+                    </li>
+                <% } %>
+            </ul>
+            </div>
     </div>
 </body>
 </html>
