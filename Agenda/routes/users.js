@@ -52,4 +52,8 @@ router.post('/compte/bloquerutilisateurs', async function(req, res){
     userController.bloquerEmailUtilisateur(req, res);
 });
 
+router.post('/compte/debloquerutilisateurs' , async function(req ,res){
+    await userController.unblockUser(req,res);
+});
+
 module.exports = router;
