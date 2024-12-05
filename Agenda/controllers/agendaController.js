@@ -220,54 +220,65 @@ exports.modifierAgenda = async (req, res) => {
   }
 };
 
+
+//Export de l agenda
 exports.exportAgenda = async (req, res, next) => {
   try {
     const agendaId = req.params.id;
+    const agenda = await Agenda.findById(agendaId);
 
-    const agenda = await Agenda.findById(agendaId).populate('rendezVous');
-    if (!agenda) return res.status(404).send("Agenda not found.");
+    if (!agenda) {
+      return res.status(404).send("Aucun agenda ne correspond a cet id");
+    }
 
-    const exportDir = path.join(__dirname, '../exports');
+    // recuperation des rdv de l agenda a exporter
+    const rendezVousList = await RendezVous.find({ agenda: agendaId });
+
+    // creer l objet a exporter
+    const exportData = {
+      nom: agenda.nom,
+      description: agenda.description,
+      dateCreation: agenda.dateCreation,
+      participants: agenda.participants,
+      createurEmail: agenda.createurEmail,
+      couleur: agenda.couleur,
+      partages: agenda.partages,
+      rendezVous: rendezVousList.map(rdv => ({
+        nom: rdv.nom,
+        description: rdv.description,
+        dateCreation: rdv.dateCreation,
+        dateRendezVous: rdv.dateRendezVous,
+        participants: rdv.participants,
+        createurEmail: rdv.createurEmail,
+        duree: rdv.duree,
+        couleur: rdv.couleur,
+        estRecurrent: rdv.estRecurrent,
+        typeRecurrence: rdv.typeRecurrence,
+        accepte: rdv.accepte,
+        refuse: rdv.refuse,
+        finRecurrence: rdv.finRecurrence
+      }))
+    };
+
+    // creer le dossier export s il n existe pas
+    /*const exportDir = path.join(__dirname, '../exports');
     if (!fs.existsSync(exportDir)) {
       fs.mkdirSync(exportDir, { recursive: true });
-    }
+    }*/
 
-    const csvFilePath = path.join(exportDir, `agenda_${agendaId}.csv`);
+    // enregistre le fichier en JSON
+    const jsonFilePath = path.join(exportDir, `agenda_${agendaId}.json`);
+    fs.writeFileSync(jsonFilePath, JSON.stringify(exportData, null, 2));
 
-    const csvWriter = createCsvWriter({
-      path: csvFilePath,
-      header: [
-        { id: 'key', title: 'Key' },
-        { id: 'value', title: 'Value' },
-      ],
+    // telecharge le fichier dans le navigateur
+    res.download(jsonFilePath, `agenda_${agenda.nom}.json`, (err) => {
+      // suppression du fichier apres envoi
+      fs.unlinkSync(jsonFilePath);
+      if (err) {
+        next(err);
+      }
     });
 
-    //boucle pour l agenda
-    const records = [
-      { key: 'Nom', value: agenda.nom },
-      { key: 'Description', value: agenda.description || '' },
-      { key: 'Date de Création', value: agenda.dateCreation.toISOString() },
-      { key: 'Participants', value: agenda.participants.join(', ') },
-      { key: 'Créateur Email', value: agenda.createurEmail },
-      { key: 'Couleur', value: agenda.couleur },
-    ];
-
-    //boucle pour les rdv
-    for (const rdvId of agenda.rendezVous) {
-      const rdv = await RendezVous.findById(rdvId);
-      if (rdv) {
-        records.push(
-            { key: 'RendezVous - Nom', value: rdv.nom },
-            { key: 'RendezVous - Description', value: rdv.description || '' },
-            { key: 'RendezVous - Date', value: rdv.dateRendezVous.toISOString() },
-            { key: 'RendezVous - Participants', value: rdv.participants.join(', ') },
-            { key: 'RendezVous - Durée', value: `${rdv.duree.heures}h ${rdv.duree.minutes}m` }
-        );
-      }
-    }
-
-    await csvWriter.writeRecords(records);
-    res.download(csvFilePath);
   } catch (err) {
     console.error(err);
     next(err);
@@ -275,71 +286,71 @@ exports.exportAgenda = async (req, res, next) => {
 };
 
 
+// Import de l agenda
 exports.importAgenda = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).send('No file uploaded.');
+      return res.status(400).send('Pas de fichier selectionne');
     }
 
-    const filePath = req.file.path;
-    const agendaData = {};
-    const rendezVousData = [];
+    // parse le json
+    const fileContent = fs.readFileSync(req.file.path, 'utf8');
+    const importData = JSON.parse(fileContent);
 
-    // Parse le CSV
-    fs.createReadStream(filePath)
-        .pipe(csvParser())
-        .on('data', (row) => {
-          if (row.Key === 'Nom') agendaData.nom = row.Value;
-          else if (row.Key === 'Description') agendaData.description = row.Value || '';
-          else if (row.Key === 'Participants') agendaData.participants = row.Value.split(',').map(p => p.trim());
-          else if (row.Key === 'Créateur Email') agendaData.createurEmail = row.Value;
-          else if (row.Key === 'Couleur') agendaData.couleur = parseInt(row.Value, 10);
-          else if (row.Key.startsWith('RendezVous')) {
-            const field = row.Key.split(' - ')[1];
-            if (!rendezVousData[rendezVousData.length - 1] || field === 'Nom') {
-              rendezVousData.push({});
-            }
-            const currentRdv = rendezVousData[rendezVousData.length - 1];
-            if (field === 'Nom') currentRdv.nom = row.Value;
-            if (field === 'Description') currentRdv.description = row.Value || '';
-            if (field === 'Date') currentRdv.dateRendezVous = new Date(row.Value);
-            if (field === 'Participants') {
-              currentRdv.participants = row.Value ? row.Value.split(',').map(p => p.trim()) : [];
-            }
-            if (field === 'Durée') {
-              const [heures, minutes] = row.Value.split('h').map(str => parseInt(str.trim(), 10));
-              currentRdv.duree = { heures, minutes };
-            }
-          }
-        })
-        .on('end', async () => {
-          const newAgenda = new Agenda(agendaData);
-          await newAgenda.save();
+    // creation de lagenda
+    const newAgenda = new Agenda({
+      nom: importData.nom,
+      description: importData.description,
+      participants: importData.participants,
+      createurEmail: importData.createurEmail,
+      couleur: importData.couleur,
+      partages: importData.partages || [],
+      rendezVous: []
+    });
 
-          // ajoute les rdv a l agenda
-          for (const rdv of rendezVousData) {
-            //console.log(rdv);
-            const newRdv = new RendezVous({
-              ...rdv,
-              agenda: newAgenda._id,
-              createurEmail: newAgenda.createurEmail, // Set creator's email from the agenda
-            });
-            await newRdv.save();
+    const savedAgenda = await newAgenda.save();
 
-            newAgenda.rendezVous.push(newRdv._id);
-          }
-          console.log('RendezVous Data:', rendezVousData);
-          await newAgenda.save();
+    // creation des rdv
+    const rendezVousPromises = importData.rendezVous.map(async rdvData => {
+      const newRdv = new RendezVous({
+        nom: rdvData.nom,
+        description: rdvData.description,
+        dateCreation: new Date(rdvData.dateCreation),
+        dateRendezVous: new Date(rdvData.dateRendezVous),
+        participants: rdvData.participants,
+        createurEmail: rdvData.createurEmail,
+        agenda: savedAgenda._id,
+        duree: rdvData.duree,
+        couleur: rdvData.couleur,
+        estRecurrent: rdvData.estRecurrent,
+        typeRecurrence: rdvData.typeRecurrence,
+        accepte: rdvData.accepte,
+        refuse: rdvData.refuse,
+        finRecurrence: rdvData.finRecurrence ? new Date(rdvData.finRecurrence) : undefined
+      });
 
-          fs.unlinkSync(filePath);
+      const savedRdv = await newRdv.save();
+      return savedRdv._id;
+    });
+    const rendezVousIds = await Promise.all(rendezVousPromises);
 
-          res.status(201).send('Agenda and rendezvous imported successfully!');
-        });
+    savedAgenda.rendezVous = rendezVousIds;
+    await savedAgenda.save();
+
+    // clean up du fichier upload
+    fs.unlinkSync(req.file.path);
+
+    return res.redirect('/agenda');
+
   } catch (err) {
-    console.error(err);
+    if (req.file && req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
+    console.error('Echec de l import:', err);
     next(err);
   }
 };
+
 
 // getAgenda
 exports.getAgenda = async (req, res, next, agendaId) => {
