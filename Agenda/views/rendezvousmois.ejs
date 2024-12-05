@@ -84,10 +84,6 @@
                     <form action="/rendezvous/<%= agenda.id %>/creer" method ="GET">
                         <button>Ajouter un rendez-vous</button>
                     </form>
-                    <form id="chooseWeekDate" method="GET" action="/rendezvous/<%=agenda.id%>">
-                        <input type="week" name="weekDate" id="chooseWeekDateInput" required>
-                        <button type="submit"> Changer de semaine </button>
-                    </form>
                     <form id="chooseMonthDate" method="GET" action="/rendezvous/<%=agenda.id%>/mois">
                         <input type="month" name="monthDate" id="chooseMonthDateInput" required>
                         <button type="submit"> Changer de mois </button>

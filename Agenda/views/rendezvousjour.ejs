@@ -153,6 +153,8 @@
             </form>
 
             <form id="mois" method="GET" action="/rendezvous/<%=agenda.id%>/mois">
+                <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
                 <input type="hidden" name="jourParametre2" value ="<%=caseDepart%>"/>
                 <button class="nav" type="submit">Vue Mensuelle</button>
             </form>
