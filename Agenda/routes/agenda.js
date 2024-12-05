@@ -3,8 +3,26 @@ const router = express.Router();
 const agendaController = require('../controllers/agendaController');
 //multer pour importer et exporter
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/') // Make sure this directory exists
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/json') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only JSON files are allowed'));
+        }
+    }
+});
 
 // afficher la page principale
 router.get('/', agendaController.afficherAgendas);
@@ -47,7 +65,9 @@ router.get('/export/:id', async function (req, res, next) {
 });
 
 // route import agenda
-router.post('/import', upload.single('file'), async function (req, res, next) {
+router.post('/import', upload.single('file'), async (req, res, next) => {
+    //console.log('import');
+    //console.log('fichier :', req.file);
     await agendaController.importAgenda(req, res, next);
 });
 

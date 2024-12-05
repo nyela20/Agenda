@@ -6,52 +6,45 @@
     <title><%= title %></title>
 </head>
 <body>
-    <div class="container">
-        <h1><%= title %></h1>
-        <form action="/agenda/creer" method="POST"> <!-- L'URL correspond à la route POST -->
-            <label for="nom">Nom de l'agenda:</label>
-            <input type="text" id="nom" name="nom" required><br><br>
+<div class="container">
+    <h1><%= title %></h1>
 
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" required></textarea><br><br>
+    <form action="/agenda/creer" method="POST">
+        <label for="nom">Nom de l'agenda:</label>
+        <input type="text" id="nom" name="nom" required><br><br>
 
-            <div style="display: none;">
-                <label for="createurEmail">Email du créateur:</label>
-                <input type="email" id="createurEmail" name="createurEmail" value="<%= userEmailConnected %>" style="background-color: lightgrey;" readonly required> <br><br>
-            </div>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br><br>
 
-            <label for="couleur">Choisissez une couleur :</label>
-            <select id="couleur" name="couleur" required>
-                <option value="">Sélectionnez une couleur</option>
-                <option value="0">Rouge</option>
-                <option value="1">Bleu</option>
-                <option value="2">Vert</option>
-                <option value="3">Jaune</option>
-                <option value="4">Noir</option>
-                <option value="5">Blanc</option>
-                <option value="6">Violet</option>
-                <option value="7">Orange</option>
-            </select>
-            <br><br>
-            <button type="submit">Créer Agenda</button>
-            <br><br>
-            <form action="/agenda/importer" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
-                <input type="file" id="file" name="file" accept=".csv">
-                <br>
-                <button type="submit">Importer</button>
-            </form>
-            <br><br>
-            <button type="button" onclick="window.location.href='/agenda';"> Annuler </button>               
-        </form>
-    </div>
+        <div style="display: none;">
+            <label for="createurEmail">Email du créateur:</label>
+            <input type="email" id="createurEmail" name="createurEmail" value="<%= userEmailConnected %>" style="background-color: lightgrey;" readonly required>
+        </div>
 
-    <script>
-        document.querySelector('button[name="importer"]').addEventListener('click', function() {
-            document.getElementById('file').required = true;
-        });
-        document.querySelector('button[name="creer"]').addEventListener('click', function() {
-            document.getElementById('file').required = false;
-        });
-    </script>
+        <label for="couleur">Choisissez une couleur :</label>
+        <select id="couleur" name="couleur" required>
+            <option value="">Sélectionnez une couleur</option>
+            <option value="0">Rouge</option>
+            <option value="1">Bleu</option>
+            <option value="2">Vert</option>
+            <option value="3">Jaune</option>
+            <option value="4">Noir</option>
+            <option value="5">Blanc</option>
+            <option value="6">Violet</option>
+            <option value="7">Orange</option>
+        </select>
+        <br><br>
+        <button type="submit">Créer Agenda</button>
+    </form>
+
+    <form action="/agenda/import" method="POST" enctype="multipart/form-data" class="import-form">
+        <h2>Ou importez un agenda existant</h2>
+        <input type="file" id="file" name="file" accept=".json" required>
+        <button type="submit">Importer</button>
+    </form>
+
+    <br><br>
+    <button type="button" onclick="window.location.href='/agenda';">Annuler</button>
+</div>
 </body>
 </html>
