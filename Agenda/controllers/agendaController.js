@@ -208,7 +208,11 @@ exports.supprimerAgenda = async (req, res) => {
       });
     }
 
+    // supprimer les rendez-vous associe
+    await RendezVous.deleteMany({ agenda: agendaId });
+
     await Agenda.findByIdAndDelete(agendaId);
+
     res.redirect('/agenda');
 
   } catch (error) {

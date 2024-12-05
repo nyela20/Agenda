@@ -100,6 +100,14 @@
                 <!-- Navigation des semaines/mois/annee -->
                 <div class="nav-buttons">
                     <% 
+                        let jour = ((semaine - 1) * 7 - caseDepart) + 1;
+                        let jourParametre2 = caseDepart;
+                        if(jour <= 0){
+                                jour = jour + caseDepart;
+                                jourParametre2 = caseDepart;
+                        }else{
+                            jourParametre2 = 0;
+                        }
                         let moisPrecedent;
                         let anneePrecedent = anneeParametre;
                         if (moisParametre > 1) {
@@ -118,7 +126,11 @@
                         <button class="nav" type="submit">Mois Précédent</button>
                     </form>
                     <form id="jour" method="GET" action="/rendezvous/<%=agenda.id%>/jour">
-                        <input type="hidden" name="jourParametre2" value ="<%=caseDepart%>"/>
+                        <input type="hidden" name="moisParametre" value="<%= moisParametre %>" />
+                        <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
+                        <input type="hidden" name="semaine" value="<%= semaine %>" />
+                        <input type="hidden" name="numJourActuel" value="<%=jour%>"/>
+                        <input type="hidden" name="jourParametre2" value="<%=jourParametre2%>"/>
                         <button class="nav" type="submit">Vue Journalière</button>
                     </form>
                     <form id="hebdomadaire" method="GET" action="/rendezvous/<%=agenda.id%>" >
