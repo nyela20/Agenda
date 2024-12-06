@@ -25,7 +25,7 @@ router.get('/logout', userController.logoutUser);
 
 //récupérer les informations du compte et les afficher
 router.get('/compte' , async function(req ,res){
-    userData = await userController.getUserByMail(req,res,localStorage.getItem("userEmail"));
+    userData = await userController.getUserByMail(req,res,req.session.email);
     res.render('compte', { title : 'Votre Compte',userData});
 });
 

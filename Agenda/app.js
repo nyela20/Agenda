@@ -5,9 +5,20 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var app = express();
 
-// local storage
-var LocalStorage = require('node-localstorage').LocalStorage;
-localStorage = new LocalStorage('./scratch');
+// connection a la session
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+app.use(session({
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false },
+  store: MongoStore.create({
+    mongoUrl: 'mongodb://localhost:27017/sessions',
+    collectionName: 'sessions',
+  }),
+
+}));
 
 // Connexion à MongoDB
 const mongoose = require('mongoose');

@@ -70,7 +70,7 @@ exports.loginUser = async (req , res) =>{
     }
     
     // enregistrer le mail de l utilisateur connecte
-    localStorage.setItem('userEmail', email);
+    req.session.email = email;
     
     res.redirect('/agenda'); // rediger vers la page principale
   }catch(err){
@@ -89,14 +89,17 @@ exports.getUsers = async (req, res) => {
 };
 // Déconnexion d'un utilisateur
 exports.logoutUser = async (req, res) => {
-  //Vide de localStorage sans vérifier l'email
-  localStorage.clear(); 
-  res.redirect('/');
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).send('Erreur lors de la déconnexion');
+    }
+    res.redirect('/');
+  });
 };
 
 exports.getUserByMail = async (req, res) => {
   try {
-    const users = localStorage.getItem("userEmail");
+    const users = req.session.email;
     const temp = await User.findOne({"email":users});
     return temp;
   } catch (err) {
@@ -108,7 +111,7 @@ exports.updateUserByMail = async (req, res) => {
   try {
     
     const{nom , email} = req.body;
-    const oldMail = localStorage.getItem("userEmail");
+    const oldMail = req.session.email;
     
     await User.updateOne({"email":oldMail},{$set:{"name":nom,"email":email}});
     
@@ -122,7 +125,7 @@ exports.updateUserByMail = async (req, res) => {
 
     await Agenda.updateMany({"createurEmail":oldMail},{$set:{"createurEmail":email}});
 
-    localStorage.setItem("userEmail",email);
+    req.session.email = email;
     res.redirect("/agenda");
     // res.status(200).send(temp);
 
@@ -261,7 +264,7 @@ exports.bloquerEmailUtilisateur = async (req , res) =>{
   try {
 
     let noninsert = [];
-    const email = localStorage.getItem("userEmail");
+    const email = req.session.email;
     userData = await User.findOne({"email" : email });
 
     const emails = req.body.emails;

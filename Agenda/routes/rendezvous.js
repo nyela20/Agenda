@@ -12,9 +12,10 @@ router.get('/:agendaId/jour', rendezVousController.afficherRendezVousJour);
 router.get('/:agendaId/mois', rendezVousController.afficherRendezVousMois);
 
 // afficher formulaire pour creer un rendez-vous
-router.get('/:agendaId/creer', function(req, res) {
+router.get('/:agendaId/creer', async function(req, res, next) {
     const agendaId = req.params.agendaId; // récupérer l'ID de l'agenda
-    res.render('creerrendezvous', { title: 'Création de Rendez-vous', agendaId, userEmailConnected: localStorage.getItem("userEmail") });
+    const agendas = await rendezVousController.getAllAgendas(req,res);
+    res.render('creerrendezvous', { title: 'Création de Rendez-vous',req, agendaId, agendas, userEmailConnected: req.session.email});
 });
 
 // affiche les paramètres d'un rendez-vous
@@ -28,7 +29,7 @@ router.get('/:agendaId/informations/:rendezvousId', async function(req, res, nex
         { title: 'Modifier les informations du Rendez-vous', 
             rendezvous, dateRendezVousFormatted,
             agendaId, 
-            userEmailConnected: localStorage.getItem("userEmail") });
+            userEmailConnected: req.session.email });
 });
 
 

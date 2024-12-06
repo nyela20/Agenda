@@ -8,20 +8,21 @@ exports.creerRendezVous = async (req, res) => {
       nom,
       description,
       dateRendezVous,
+      agendaAssocie,
       participants,
       createurEmail,
       dureeHeures,
       dureeMinutes,
       estRecurrent,
       typeRecurrence,
-      finRecurrence
+      finRecurrence,
+      agendaOuvert,
+      agendaOuvertApresModif
     } = req.body;
     
-    const agenda = await Agenda.findById(req.params.agendaId);
-
+    const agenda = await Agenda.findById(agendaAssocie);
 
     // creer un rdv Recurrence
-
     if(estRecurrent === 'on' && typeRecurrence !== 'aucun'){
       const dateDebut = new Date(dateRendezVous);
       const dateFin = new Date(finRecurrence + 'T23:59:59');
@@ -37,7 +38,7 @@ exports.creerRendezVous = async (req, res) => {
           dateRendezVous : new Date(dateActuelle),
           participants,
           createurEmail,
-          agenda: agenda ,
+          agenda: agendaAssocie,
           duree: {
             heures: dureeHeures,
             minutes: dureeMinutes
@@ -74,7 +75,7 @@ exports.creerRendezVous = async (req, res) => {
       );
 
       // ajoute les ids rdvs à l'agenda
-      await Agenda.findByIdAndUpdate(agenda._id,{
+      await Agenda.findByIdAndUpdate(agendaAssocie._id,{
         $push: {rendezVous: { $each: rendezVousSauvegardes.map(rdv => rdv._id) } }
       });
 
@@ -87,7 +88,7 @@ exports.creerRendezVous = async (req, res) => {
         dateRendezVous,
         participants,
         createurEmail,
-        agenda: agenda ,
+        agenda: agendaAssocie ,
         duree: {
           heures: dureeHeures,
           minutes: dureeMinutes
@@ -99,13 +100,17 @@ exports.creerRendezVous = async (req, res) => {
       const rendezVousSauvegarde = await nouveauRendezVous.save();
 
       // ajoute le rendez-vous à l'agenda correspondant
-      await Agenda.findByIdAndUpdate(agenda._id, {
+      await Agenda.findByIdAndUpdate(agendaAssocie._id, {
         $push: { rendezVous: rendezVousSauvegarde._id }
       });
     }
 
     // redirection
-    res.redirect('/rendezvous/'+agenda._id);
+    if(req.body.agendaOuvertApresModif){
+      res.redirect('/rendezvous/'+ agendaOuvertApresModif);
+    }else{
+      res.redirect('/rendezvous/'+agendaOuvert);
+    }
   } catch (error) {
     // Réponse erreur
     res.status(500).json({
@@ -123,7 +128,7 @@ exports.afficherRendezVous = async (req, res) => {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
 
-    const userConnected = localStorage.getItem("userEmail");
+    const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: userConnected });
 
     const agendasPartages = await Agenda.find({
@@ -307,7 +312,7 @@ exports.afficherRendezVousJour = async (req, res) => {
   try {
     const agendaId = req.params.agendaId;
     const agenda = await Agenda.findById(agendaId);
-    const userConnected = localStorage.getItem("userEmail");
+    const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     if (!agenda) {
@@ -479,7 +484,7 @@ exports.afficherRendezVousMois = async (req, res) => {
     const agenda = await Agenda.findById(agendaId);
     //const rendezVousList = await RendezVous.find({ agenda: agendaId });  // les rendez-vous de cet agenda
 
-    const userConnected = localStorage.getItem("userEmail");
+    const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
     const agendasPartages = await Agenda.find({ 
@@ -666,7 +671,7 @@ exports.accepterRendezVous = async (req, res, next) => {
     const rendezvousId = req.params.rendezvousId;
     const agendaId = req.params.agendaId;
     const rendezvous = await RendezVous.findById(rendezvousId);
-    const userConnected = localStorage.getItem("userEmail");
+    const userConnected = req.session.email;
 
      // mis a jour de tout les rdvs recurrents
      if(req.body.recurrence){
@@ -715,7 +720,7 @@ exports.refuserRendezVous = async (req, res, next) => {
     const rendezvousId = req.params.rendezvousId;
     const agendaId = req.params.agendaId;
     const rendezvous = await RendezVous.findById(rendezvousId);
-    const userConnected = localStorage.getItem("userEmail");
+    const userConnected = req.session.email;
 
     // mis a jour de tout les rdvs recurrents
     if(req.body.recurrence){
@@ -791,10 +796,12 @@ exports.modifierRendezVous = async (req, res) => {
       dureeMinutes, 
       typeRecurrence, 
       finRecurrence,
-      recurrence
+      recurrence,
+      agendaOuvert
     } = req.body;
 
     const rendezVous = await RendezVous.findById(req.params.rendezvousId);
+
     if (!rendezVous) {
       return res.status(404).json({ message: 'Rendez-vous non trouvé' });
     }
@@ -835,6 +842,8 @@ exports.modifierRendezVous = async (req, res) => {
         }
       );
 
+    
+
       // modification de la date de début du rendez-vous, la date de fin et le type de récurrence (decaler tout les rdvs)
       if (new Date(dateRendezVous).getTime()  !== new Date(rendezVous.dateRendezVous).getTime() || 
       new Date(finRecurrence + 'T23:59:59').getTime() !== new Date(rendezVous.finRecurrence).getTime() || 
@@ -845,8 +854,11 @@ exports.modifierRendezVous = async (req, res) => {
         req.body.accepte = rendezVous.accepte;
         req.body.refuse = rendezVous.refuse;
         req.body.estRecurrent = 'on';
+        req.body.agendaAssocie = rendezVous.agenda;
         req.body.dateCreation = rendezVous.dateCreation;
-        req.body.couleur = rendezVous.couleur;
+        req.body.agendaOuvert = rendezVous.agenda._id;
+        req.body.agendaOuvertApresModif = agendaOuvert;
+
         
         await RendezVous.deleteMany({
           agenda: rendezVous.agenda,
@@ -855,6 +867,7 @@ exports.modifierRendezVous = async (req, res) => {
             $lt: dateCreationEnd
           }
         });
+        
         await this.creerRendezVous(req, res);     
         return;    
       }
@@ -879,8 +892,20 @@ exports.modifierRendezVous = async (req, res) => {
       );
     }
 
-    res.redirect('/rendezvous/' + req.params.agendaId);
+    res.redirect('/rendezvous/' + rendezVous.agenda._id);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la modification du rendez-vous', error: error.message });
   }
 };
+
+exports.getAllAgendas = async (req, res) => {
+  try {
+    const agendas = await Agenda.find(); 
+    if (!agendas) {
+      return res.status(500).json({ message: "Erreur recuperation des agendas" });
+    }
+    return agendas;
+  } catch (error) {
+    res.status(500).json({ error: "Erreur recuperation des agendas" });
+  }
+}

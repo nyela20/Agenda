@@ -10,7 +10,10 @@
     <div style="display: flex; gap:2%;">
         <div class="container">
             <h1><%= title %></h1>
+            <%=agendaId%>
             <form id="modifierRendezVousForm" action="/rendezvous/<%=agendaId%>/modifier/<%=rendezvous.id%>" method="POST">
+                <label for="agendaOuvert"></label>
+                <input type="hidden" id="agendaOuvert" name="agendaOuvert" value="<%=agendaId%>" required>
                 <label for="nom">Nom du rendez-vous : </label>
                 <input type="text" id="nom" name="nom" value="<%=rendezvous.nom%>"required>
                 <br>

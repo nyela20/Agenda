@@ -32,7 +32,7 @@ exports.creerAgenda = async (req, res) => {
 // pour afficher la page des agendas (Page principale)
 exports.afficherAgendas = async (req, res) => {
     try {
-        const userEmailConnected = localStorage.getItem('userEmail');
+        const userEmailConnected = req.session.email;
 
         // récuperer les agendas depuis la bdd
         const agendasCrees = await Agenda.find({ createurEmail: userEmailConnected }); 
@@ -53,7 +53,7 @@ exports.afficherAgendas = async (req, res) => {
           agendasPartages
         });
     } catch (error) {
-        res.status(500).send('Erreur lors de la récupération des agendas' + localStorage.getItem('userEmail'));
+        res.status(500).send('Erreur lors de la récupération des agendas' + req.session.email);
     }
 };
 
@@ -201,7 +201,7 @@ exports.supprimerAgenda = async (req, res) => {
       });
     }
 
-    const userEmail = localStorage.getItem('userEmail');
+    const userEmail = req.session.email;
     if (agenda.createurEmail !== userEmail) {
       return res.status(403).json({
         message: 'Vous n\'avez pas les droits pour supprimer cet agenda'

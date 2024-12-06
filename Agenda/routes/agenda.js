@@ -29,7 +29,7 @@ router.get('/', agendaController.afficherAgendas);
 
 // afficher le formulaire agenda
 router.get('/creer' , function(req ,res){
-    res.render('creeragenda', { title : 'Creation agenda', userEmailConnected : localStorage.getItem("userEmail")});
+    res.render('creeragenda', { title : 'Creation agenda', userEmailConnected : req.session.email});
 });
 
 // creation agenda
@@ -50,7 +50,7 @@ router.post('/:agendaId/annuler-partage', agendaController.annulerPartage);
 router.get('/:agendaId/modifier' , async function(req ,res, next){
     const agendaId = req.params.agendaId;
     const agenda = await agendaController.getAgenda(req, res,next,  agendaId)
-    res.render('agendainfos', { title : 'Modifier agenda', agenda, agendaId , userEmailConnected : localStorage.getItem("userEmail")});
+    res.render('agendainfos', { title : 'Modifier agenda', agenda, agendaId , userEmailConnected : req.session.email});
 });
 
 // route appliquer modif
