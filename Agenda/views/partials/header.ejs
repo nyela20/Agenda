@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Agenda M1' %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/header.css">
+    <link rel="stylesheet" href="/stylesheets/footer.css">
+    <% if (typeof additionalStyles !== 'undefined') { %>
+        <% additionalStyles.forEach(function(style) { %>
+            <link rel="stylesheet" href="/stylesheets/<%= style %>.css">
+        <% }); %>
+    <% } %>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="logo-container">
+                <img src="/images/logo.png" alt="Agenda M1 Logo" class="logo-image">
+                <span class="logo-text">Agenda M1</span>
+            </a>
+            <nav class="nav-links">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <a href="/agenda">Mon Agenda</a>
+                    <a href="/users/compte">Mon Compte</a>
+                    <a href="/users/logout">Déconnexion</a>
+                <% } else { %>
+                    <a href="/users/login">Connexion</a>
+                    <a href="/users/register">Inscription</a>
+                <% } %>
+            </nav>
+        </div>
+    </header>
+    <div style="height: 70px;"></div>
+    <main>
