@@ -1,5 +1,6 @@
 const RendezVous = require('../models/rendezvous.js'); 
 const Agenda = require('../models/agenda.js'); 
+const User = require('../models/user');
 
 // Fonction pour créer un rendez-vous et le sauvegarder dans la base de données
 exports.creerRendezVous = async (req, res) => {
@@ -131,6 +132,9 @@ exports.afficherRendezVous = async (req, res) => {
     const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: userConnected });
 
+    const mailpartageobjets = agenda.partages;
+    let mailpartage = [];
+
     const agendasPartages = await Agenda.find({
       "partages.email": userConnected
     });
@@ -152,6 +156,11 @@ exports.afficherRendezVous = async (req, res) => {
         agendaIds.push(agenda.id)
       }
     });
+
+    mailpartageobjets.forEach(agenda => {
+      mailpartage.push(agenda.email)
+    });
+    mailpartage.push(userConnected)
 
     //date de systeme actuelle
     const dateActuelle = new Date();
@@ -234,6 +243,8 @@ exports.afficherRendezVous = async (req, res) => {
     const nomFiltre = req.query.nomFiltre;
     const emailFiltre = req.query.emailFiltre;
 
+    const userConnectedData = await User.find({"email":userConnected});
+
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
       agenda : {$in : agendaIds},
@@ -252,7 +263,7 @@ exports.afficherRendezVous = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ],
+      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case
     });
@@ -315,6 +326,9 @@ exports.afficherRendezVousJour = async (req, res) => {
     const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
+    const mailpartageobjets = agenda.partages;
+    let mailpartage = [];
+
     if (!agenda) {
       return res.status(401).send('Agenda non trouvé : ' + agendaId);
     }
@@ -336,6 +350,11 @@ exports.afficherRendezVousJour = async (req, res) => {
         agendaIds.push(agenda.id)
       }
     });
+
+    mailpartageobjets.forEach(agenda => {
+      mailpartage.push(agenda.email)
+    });
+    mailpartage.push(userConnected)
     
     //date de systeme actuelle
     const dateActuelle = new Date();
@@ -380,6 +399,8 @@ exports.afficherRendezVousJour = async (req, res) => {
     const nomFiltre = req.query.nomFiltre;
     const emailFiltre = req.query.emailFiltre;
 
+    const userConnectedData = await User.find({"email":userConnected});
+
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
       agenda : {$in : agendaIds},
@@ -398,7 +419,7 @@ exports.afficherRendezVousJour = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ],
+      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
     });
@@ -487,6 +508,9 @@ exports.afficherRendezVousMois = async (req, res) => {
     const userConnected = req.session.email;
     const agendas = await Agenda.find({ createurEmail: agenda.createurEmail });
 
+    const mailpartageobjets = agenda.partages;
+    let mailpartage = [];
+
     const agendasPartages = await Agenda.find({ 
       "partages.email": userConnected 
     });
@@ -508,6 +532,11 @@ exports.afficherRendezVousMois = async (req, res) => {
         agendaIds.push(agenda.id)
       }
     });
+
+    mailpartageobjets.forEach(agenda => {
+      mailpartage.push(agenda.email)
+    });
+    mailpartage.push(userConnected)
 
     //date de systeme actuelle
     const dateActuelle = new Date();
@@ -545,6 +574,8 @@ exports.afficherRendezVousMois = async (req, res) => {
     const nomFiltre = req.query.nomFiltre;
     const emailFiltre = req.query.emailFiltre;
 
+    const userConnectedData = await User.find({"email":userConnected});
+    
     // chercher les rdvs pour mois spécificque
     const rendezVousList = await RendezVous.find({
       agenda : {$in : agendaIds},
@@ -563,7 +594,7 @@ exports.afficherRendezVousMois = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ],
+      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
     

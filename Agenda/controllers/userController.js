@@ -288,16 +288,16 @@ exports.bloquerEmailUtilisateur = async (req , res) =>{
         await User.updateOne({"email":email},{$push:{"blocked":emails2[i]}});
 
         for(let agenda of allAgendas){
-          let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : emails2[i]});
-          // console.log(rendezvousagenda," ----rendezvous agenda");
+          // let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : emails2[i]});
+          // // console.log(rendezvousagenda," ----rendezvous agenda");
           
-          for(let rdv of rendezvousagenda){
-            req.body.recurrence = false;
-            req.params.rendezvousId = rdv._id;
-            req.params.blocage = true;
-            // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----req");
-            await rendezVousController.supprimerRendezVous(req);
-          }
+          // for(let rdv of rendezvousagenda){
+          //   req.body.recurrence = false;
+          //   req.params.rendezvousId = rdv._id;
+          //   req.params.blocage = true;
+          //   // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----req");
+          //   await rendezVousController.supprimerRendezVous(req);
+          // }
           const partageExistant = agenda.partages.find(p => p.email === emails2[i]);
           if(partageExistant){
             req.params.agendaId = agenda._id;
@@ -316,17 +316,17 @@ exports.bloquerEmailUtilisateur = async (req , res) =>{
 
         //parcours tous les agendas dans allhisagendas
         for(let agenda of allhisAgendas){
-          //trouve tout nos rdv dans l'instance d'un agenda "agenda" de allhisagenda
-          let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : email});
+          // //trouve tout nos rdv dans l'instance d'un agenda "agenda" de allhisagenda
+          // let rendezvousagenda = await RendezVous.find({agenda : agenda._id , "createurEmail" : email});
 
-          //parcours les rdv qu'on as trouve et les supprimes de l'instance d'agenda
-          for(let rdv of rendezvousagenda){
-            req.body.recurrence = false;
-            req.params.rendezvousId = rdv._id;
-            req.params.blocage = true;
-            // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----reqhis");
-            await rendezVousController.supprimerRendezVous(req);
-          }
+          // //parcours les rdv qu'on as trouve et les supprimes de l'instance d'agenda
+          // for(let rdv of rendezvousagenda){
+          //   req.body.recurrence = false;
+          //   req.params.rendezvousId = rdv._id;
+          //   req.params.blocage = true;
+          //   // console.log(req.body.recurrence,req.params.rendezvousId,req.params.blocage," ----reqhis");
+          //   await rendezVousController.supprimerRendezVous(req);
+          // }
           //annule le partage de l'instance d'agenda qui nous à été fait si il nous à été partagé
           const partageExistant = agenda.partages.find(p => p.email === email);
           if(partageExistant){
