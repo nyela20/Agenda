@@ -132,6 +132,22 @@ h1{
     )1;
 }
 
+.error-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.close-button {
+    float: right;
+    cursor: pointer;
+}
+
 
 
 .nav{
