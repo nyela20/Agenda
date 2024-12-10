@@ -587,17 +587,25 @@ exports.afficherRendezVousMois = async (req, res) => {
             $gte: debutMois,
             $lte: finMois
           }
-        },
-        // rdv récurrents =
-        {
-          estRecurrent: true,
-          dateRendezVous: { $lte: finMois },
-          finRecurrence: { $gte: debutMois }
         }
       ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
     
+    });
+
+    //traiter les RDV récurrents séparements
+    let tempdetemp = await RendezVous.find({agenda : {$in : agendaIds},estRecurrent: true,
+      dateRendezVous:{$lte: finMois},
+      finRecurrence:{$gte:debutMois},
+      createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage}
+    });
+
+    //push les rdv récurrents si ils respectent les conditions
+    tempdetemp.forEach(rdv => {
+      if((rdv.dateRendezVous.getMonth()) == finMois.getMonth() && rdv.dateRendezVous.getFullYear() == anneeParametre){
+        rendezVousList.push(rdv);
+      }
     });
 
     // filtrage les rdvs
