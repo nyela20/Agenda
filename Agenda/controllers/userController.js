@@ -112,6 +112,17 @@ exports.updateUserByMail = async (req, res) => {
     
     const{nom , email} = req.body;
     const oldMail = req.session.email;
+
+    const nomRegex = /(^[A-Za-z]{4,})+([A-Za-z]|[0-9_-])+/;
+    if (!nomRegex.test(nom)) {
+      return res.status(400).render('compte', { error: 'Nom invalide' });
+    }
+    
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).render('compte', { error: 'Adresse email invalide.' });
+    }
+
     
     await User.updateOne({"email":oldMail},{$set:{"name":nom,"email":email}});
     

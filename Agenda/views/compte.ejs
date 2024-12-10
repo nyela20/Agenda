@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="../../stylesheets/styleCompte.css">
-    <title><%= title %></title>
+    <title>Votre Compte</title>
 </head>
 <body>
     <div class="container">
-        <h1><%= title %></h1>
+        <h1>Votre Compte</h1>
         <h2></h2>
         <form action="/users/compte" method="POST">
             <label for="nom">Nom :</label>
@@ -19,6 +19,11 @@
             <div>
                 <button>Appliquer les modifications</button>
             </div>
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="error-message">
+                    <%= error %>
+                </div>
+            <% } %>
         </form>
         <form action="/users/compte/bloquerutilisateurs" method="POST">
             <label for="emails">Emails à bloquer (Séparés par des virgules et sans espaces):</label>
