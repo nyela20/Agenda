@@ -45,6 +45,14 @@
 
     <br><br>
     <button type="button" onclick="window.location.href='/agenda';">Annuler</button>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="error-popup">
+            <span class="close-button" onclick="this.parentElement.style.display='none'">×</span>
+            <p><%= error %></p>
+        </div>
+    <% } %>
+
 </div>
 </body>
 </html>

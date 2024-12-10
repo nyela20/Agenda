@@ -294,10 +294,10 @@ exports.exportAgenda = async (req, res, next) => {
     };
 
     // creer le dossier export s il n existe pas
-    /*const exportDir = path.join(__dirname, '../exports');
+    const exportDir = path.join(__dirname, '../exports');
     if (!fs.existsSync(exportDir)) {
       fs.mkdirSync(exportDir, { recursive: true });
-    }*/
+    }
 
     // enregistre le fichier en JSON
     const jsonFilePath = path.join(exportDir, `agenda_${agendaId}.json`);
@@ -323,18 +323,35 @@ exports.exportAgenda = async (req, res, next) => {
 exports.importAgenda = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).send('Pas de fichier selectionne');
+      return res.render('creeragenda', {
+        title: 'Creation agenda',
+        userEmailConnected: req.session.userEmail || '', // Adjust this based on how you store user email
+        error: 'Veuillez sélectionner un fichier à importer.'
+      });
     }
 
-    // parse le json
-    const fileContent = fs.readFileSync(req.file.path, 'utf8');
-    const importData = JSON.parse(fileContent);
+    // Read and parse the JSON file
+    let importData;
+    try {
+      const fileContent = fs.readFileSync(req.file.path, 'utf8');
+      importData = JSON.parse(fileContent);
+    } catch (parseError) {
+      // Clean up the file if it exists
+      if (req.file.path) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.render('creeragenda', {
+        title: 'Creation agenda',
+        userEmailConnected: req.session.userEmail || '',
+        error: 'Le fichier sélectionné n\'est pas un fichier JSON valide.'
+      });
+    }
 
-    // creation de lagenda
+    // Create new agenda
     const newAgenda = new Agenda({
       nom: importData.nom,
       description: importData.description,
-      participants: importData.participants,
+      participants: importData.participants || [],
       createurEmail: importData.createurEmail,
       couleur: importData.couleur,
       partages: importData.partages || [],
@@ -343,44 +360,50 @@ exports.importAgenda = async (req, res, next) => {
 
     const savedAgenda = await newAgenda.save();
 
-    // creation des rdv
-    const rendezVousPromises = importData.rendezVous.map(async rdvData => {
-      const newRdv = new RendezVous({
-        nom: rdvData.nom,
-        description: rdvData.description,
-        dateCreation: new Date(rdvData.dateCreation),
-        dateRendezVous: new Date(rdvData.dateRendezVous),
-        participants: rdvData.participants,
-        createurEmail: rdvData.createurEmail,
-        agenda: savedAgenda._id,
-        duree: rdvData.duree,
-        couleur: rdvData.couleur,
-        estRecurrent: rdvData.estRecurrent,
-        typeRecurrence: rdvData.typeRecurrence,
-        accepte: rdvData.accepte,
-        refuse: rdvData.refuse,
-        finRecurrence: rdvData.finRecurrence ? new Date(rdvData.finRecurrence) : undefined
+    // Create all rendez-vous
+    if (importData.rendezVous && Array.isArray(importData.rendezVous)) {
+      const rendezVousPromises = importData.rendezVous.map(async rdvData => {
+        const newRdv = new RendezVous({
+          nom: rdvData.nom,
+          description: rdvData.description,
+          dateCreation: new Date(rdvData.dateCreation),
+          dateRendezVous: new Date(rdvData.dateRendezVous),
+          participants: rdvData.participants || [],
+          createurEmail: rdvData.createurEmail,
+          agenda: savedAgenda._id,
+          duree: rdvData.duree,
+          couleur: rdvData.couleur,
+          estRecurrent: rdvData.estRecurrent || false,
+          typeRecurrence: rdvData.typeRecurrence || 'aucun',
+          accepte: rdvData.accepte || false,
+          refuse: rdvData.refuse || false,
+          finRecurrence: rdvData.finRecurrence ? new Date(rdvData.finRecurrence) : undefined
+        });
+        return await newRdv.save();
       });
 
-      const savedRdv = await newRdv.save();
-      return savedRdv._id;
-    });
-    const rendezVousIds = await Promise.all(rendezVousPromises);
+      await Promise.all(rendezVousPromises);
+    }
 
-    savedAgenda.rendezVous = rendezVousIds;
-    await savedAgenda.save();
-
-    // clean up du fichier upload
-    fs.unlinkSync(req.file.path);
+    // Clean up the uploaded file
+    if (req.file.path) {
+      fs.unlinkSync(req.file.path);
+    }
 
     return res.redirect('/agenda');
 
   } catch (err) {
+    // Clean up the uploaded file in case of error
     if (req.file && req.file.path) {
       fs.unlinkSync(req.file.path);
     }
-    console.error('Echec de l import:', err);
-    next(err);
+
+    console.error('Import error:', err);
+    return res.render('creeragenda', {
+      title: 'Creation agenda',
+      userEmailConnected: req.session.userEmail || '',
+      error: 'Une erreur s\'est produite lors de l\'importation.'
+    });
   }
 };
 
