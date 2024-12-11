@@ -10,12 +10,20 @@
     <div>
         <header class="header">
             <ul class="menu">
-                <div class="agenda">
+                <div class="agenda-header">
+                    <h1 class="title-header">Agenda</h1>
                 </div>
-                <div class="info">
-                    <li><h2>Nom de l'agenda : <%= agenda.nom %></h2></li>
-                    <li><h4>Description : <%= agenda.description %></h4></li>
-                    <li><h4>Créateur de cet agenda : <%= agenda.createurEmail %></h4></li>
+                <div class="compte">
+                    <li>
+                        <form action = "/users/compte" method="GET">
+                            <button class="button-header" type="submit"> Modifier votre compte </button>
+                        </form>
+                    </li>
+                    <li>                 
+                        <form id="logoutForm" action="/users/logout" method="GET">
+                            <button class="button-header" type="submit" id="logoutBtn">Déconnexion</button>
+                        </form>
+                    </li>
                 </div>
             </ul>
         </header>
@@ -23,6 +31,18 @@
     <hr>
     <div class="rendezvous">
         <div class="up-mes-agendas">
+            <div>
+                <header>
+                    <ul>
+                        <div class="info">
+                            <li><h2>Nom : <%= agenda.nom %></h2></li>
+                            <li><h4>Description : <%= agenda.description %></h4></li>
+                            <li><h4>Créateur : <%= agenda.createurEmail %></h4></li>
+                        </div>
+                    </ul>
+                </header>
+            </div>
+            <hr>
             <div>
                 <h4> Rechercher/Filter les rendez-vous</h4>
                     <form id="agendafiltreForm" method="GET" action="/rendezvous/<%=agenda.id%>/mois">
@@ -32,7 +52,7 @@
                         <input type="hidden" name="anneeParametre" value="<%= anneeParametre %>" />
                         <% agendas.forEach(agendaElement => { if(!(agendaElement.id == agenda.id)){ %> <input type="checkbox" style="display: none;" value="<%=agendaElement.id%>" name="<%=agendaElement.nom%>" <% if(req.query[agendaElement.nom]){ %> checked <%} %> ><%}});%>
                         <label for="nomFiltre"> Nom : </label>
-                        <input type="text" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
+                        <input type="text" style="margin-left: 23px;" id="nomFiltre" name="nomFiltre" value="<%=nomFiltre%>"> 
                         <br><br>
                         <label for="emailFiltre"> Créateur : </label>
                         <input type="text" id="emailFiltre" name="emailFiltre" value="<%=emailFiltre%>"> 
@@ -92,6 +112,8 @@
                         <button>Fermer cet agenda</button>
                     </form>
                 </div>
+                <br>
+                <hr>
                 <br>
                 <!-- Navigation des semaines/mois/annee -->
                 <div class="nav-buttons">

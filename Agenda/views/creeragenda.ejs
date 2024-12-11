@@ -2,11 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleRegister.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleFormulaire.css">
     <title><%= title %></title>
 </head>
 <body>
-<div class="container">
+
+    <header class="header">
+        <ul class="menu">
+            <div class="agenda">
+                <h1 class="title-header">Agenda</h1>
+            </div>
+            <div class="compte">
+                <li><h2 class="email"><%= userEmailConnected %></h2></li>
+                <li>
+                    <form action = "/users/compte" method="GET">
+                        <button class="button-header" type="submit"> Modifier votre compte </button>
+                    </form>
+                </li>
+                <li>                 
+                    <form id="logoutForm" action="/users/logout" method="GET">
+                        <button class="button-header" type="submit" id="logoutBtn">Déconnexion</button>
+                    </form>
+                </li>
+            </div>
+        </ul>
+    </header>
+
+    <div class="container">
     <h1><%= title %></h1>
 
     <form action="/agenda/creer" method="POST">
@@ -34,16 +56,17 @@
             <option value="7">Orange</option>
         </select>
         <br><br>
-        <button type="submit">Créer Agenda</button>
+        <button type="submit">Ajouter</button>
     </form>
-
+    <br>
+    <hr>
     <form action="/agenda/import" method="POST" enctype="multipart/form-data" class="import-form">
-        <h2>Ou importez un agenda existant</h2>
+        <h1>Importer un agenda existant</h1>
         <input type="file" id="file" name="file" accept=".json" required>
+        <br>
         <button type="submit">Importer</button>
     </form>
-
-    <br><br>
+    <br>
     <button type="button" onclick="window.location.href='/agenda';">Annuler</button>
 
     <% if (typeof error !== 'undefined' && error) { %>

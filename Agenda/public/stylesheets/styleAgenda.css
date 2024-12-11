@@ -1,5 +1,5 @@
 body{
-    background: linear-gradient(to bottom right, rgb(0, 188, 212), #4ae2c3, rgb(0, 188, 212));
+    background: linear-gradient(to bottom right, rgb(90 90, 90), rgb(90, 90, 90), rgb(90, 90, 90));
     background-size: cover;
     background-attachment: fixed;
 }
@@ -9,6 +9,36 @@ body{
     overflow: auto;
     column-gap: 5px;
 }
+
+.button-header{
+    background-color: black; /* Fond blanc pour contraste */
+}
+
+.title-header{
+    color:#eeeeee;
+}
+
+
+.compte{
+    display: ruby;
+    position: absolute;
+    right: 20px; 
+    padding-top: 22px;
+  }
+
+.agenda{
+    display: ruby;
+}
+
+
+.menu{
+    display: flex;
+}
+
+.header{
+    background-color:rgb(60 60 60);
+    box-shadow: 14px -8px 0 26px rgb(60 60 60);
+  }
 
 .view-switch {
     display: inline-flex;
@@ -53,7 +83,7 @@ ul{
 
 
 button {
-    background-color: rgb(3, 196, 221);
+    background-color: rgb(63, 61, 65);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -64,7 +94,7 @@ button {
 }
 
 button:hover {
-    background-color: rgb(4, 170, 192);
+    background-color: rgb(12, 12, 12);
 }
 
 
@@ -82,6 +112,7 @@ button:hover {
 
 .info{
     display: block;
+    margin-left: -40px;
 }
 
 .agenda{
@@ -94,6 +125,7 @@ button:hover {
     background-color: white;
     margin-top: -9px;
     width: 100%;
+    margin-left: 0.3%;
 }
 
 .rendezvous{
@@ -151,7 +183,7 @@ h1{
 
 
 .nav{
-    background-color: #89e22b;
+    background-color: #c8cf28;
 }
 
 /* Couleurs spécifiques */

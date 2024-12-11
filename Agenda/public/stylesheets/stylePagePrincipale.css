@@ -15,8 +15,13 @@ body {
   }
   
   h1 {
-    color: #333;
+    color: #eeeeee;
     /*margin-bottom: 10px;*/
+  }
+
+  .email{
+    font-size: x-large;
+    color: #eeeeee;
   }
   
   p {
@@ -25,7 +30,7 @@ body {
   }
   
   button {
-    background-color: rgb(4, 170, 192);
+    background-color: rgb(63, 61, 65);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -36,7 +41,7 @@ body {
   }
   
   button:hover {
-    background-color: rgb(13, 108, 121);
+    background-color: rgb(0, 0, 0);
   }
 
   .agenda-partage-section{
@@ -60,7 +65,7 @@ body {
     display: ruby;
     position: absolute;
     right: 20px; 
-    padding-top: 0.3%;
+    padding-top: 0.6%;
   }
 
   .agenda{
@@ -77,11 +82,11 @@ body {
   }
 
   .voir-bouton{
-    background-color: #89e22b;
+    background-color: #c8cf28;
   }
 
   .ajouter-bouton{
-    background-color: #89e22b;
+    background-color: #c8cf28;
   }
 
   .buttonaction{
@@ -98,18 +103,22 @@ body {
   }
 
   .header{
-    background-color:rgb(0, 188, 212);
-    box-shadow: 14px -8px 0 26px rgb(0, 188, 212);
+    background-color:rgb(60 60 60);
+    box-shadow: 14px -8px 0 26px rgb(60 60 60);
   }
 
   .agendaList{
   background-color: white; /* Fond blanc pour contraste */
-  border: 2px solid rgb(0, 188, 212);; /* Bordure bleue */
+  border: 2px solid rgb(83, 83, 83);; /* Bordure bleue */
   border-radius: 8px; /* Coins arrondis */
-  box-shadow: 0 4px 6px rgba(32, 33, 34, 0.3); /* Ombre légèrement bleue */
+  box-shadow: 0 4px 6px rgba(13, 13, 14, 0.3); /* Ombre légèrement bleue */
   transition: box-shadow 0.3s ease, transform 0.3s ease; /* Animation fluide */
   padding: 2%;
   margin-top: 0.5%;
+  }
+
+  .button-header{
+    background-color: black; /* Fond blanc pour contraste */
   }
 
   .mes-agendas{
@@ -117,11 +126,12 @@ body {
   }
 
   .agendaList:hover {
-    box-shadow: 0 8px 15px rgba(74, 144, 226, 0.5); /* Augmentation de l'ombre */
+    box-shadow: 0 18px 30px rgba(0, 0, 0, 0.5); /* Augmentation de l'ombre */
     transform: translateY(-5px); /* Simule un effet 3D (légèrement levé) */
   }
 
   .mesagendas{
+    margin-top: 2%;
     margin-left: 1.7%;
   }
 
