@@ -7,7 +7,13 @@
     <link rel="stylesheet" href="/stylesheets/styleRegister.css">
 </head>
 <body>
-    <div class="container">
+    <div style="display: inline-grid;">
+        <div>
+            <h1 style="color:rgb(78, 78, 78); font-family: Brush Script MT, Brush Script Std, cursive; font-size: xxx-large;">
+                "Organisez votre vie facilement : des agendas sur mesure, pensées juste pour vous, avec notre application"
+            </h1>
+        </div>
+        <div class="container" style="place-self: center;">
         <h1>Créer un compte</h1>
         
         <form action="/users/register" method="post">
@@ -36,6 +42,7 @@
             <button type="submit">Créer le compte</button>
         </form>
         <p>Vous avez déjà un compte ? <a href="/users/login">Se connecter</a></p>
+        </div>
     </div>
 </body>
 </html>

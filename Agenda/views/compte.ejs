@@ -2,56 +2,84 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleCompte.css">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/styleFormulaire.css">
     <title><%= title %></title>
 </head>
 <body>
-    <div class="container">
-        <h1><%= title %></h1>
-        <h2></h2>
-        <form action="/users/compte" method="POST">
-            <label for="nom">Nom :</label>
-            <input type="text" id="nom" name="nom" value="<%=userData.name%>"required>
-            <br><br>
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" value="<%= userData.email%>"required>
-            <br><br>
-            <div>
-                <button>Appliquer les modifications</button>
+    <header class="header">
+        <ul class="menu">
+            <div class="agenda">
+                <h1 class="title-header">Agenda</h1>
             </div>
-        </form>
-        <form action="/users/compte/bloquerutilisateurs" method="POST">
-            <label for="emails">Emails à bloquer (Séparés par des virgules et sans espaces):</label>
-            <br>
-            <input type="text" id="emails" name="emails">
-            <br><br>
-            <div>
-                <button>Bloquer Mails</button>
+            <div class="compte">
+                <li>
+                    <form action = "/users/compte" method="GET">
+                        <button class="button-header" type="submit"> Modifier votre compte </button>
+                    </form>
+                </li>
+                <li>                 
+                    <form id="logoutForm" action="/users/logout" method="GET">
+                        <button class="button-header" type="submit" id="logoutBtn">Déconnexion</button>
+                    </form>
+                </li>
             </div>
-            <%if(typeof noninsert !== 'undefined' && noninsert.length > 0){%>
-                <div class="error-message">
-                        <span>Ces mails n'ont pas pu être bloqué car inexistant ou déjà bloqué :</span>
-                        <br>
-                        <% for(i = 0; i < noninsert.length ; i++){ %>
-                            <%=noninsert[i]%>
-                            <br>
-                        <% } %>
+        </ul>
+    </header>
+    <div style="place-self: center;">
+        <div style="display: inline-flex;place-content: space-between;gap:1%;">
+        <div class="container">
+            <h1><%= title %></h1>
+            <form action="/users/compte" method="POST">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" name="nom" value="<%=userData.name%>"required>
+                <br>
+                <label for="email">Email :</label>
+                <input type="email" id="email" name="email" value="<%= userData.email%>"required>
+                <br>
+                <div>
+                    <button>Appliquer les modifications</button>
                 </div>
-            <% } %>
-        </form>
-        <br>
-        <a href="/agenda"><button>Retour</button></a>
-        <div>
-            <ul class="agendaListUL">
+            </form>
+            <br>
+            <hr>
+            <br>
+            <form action="/users/compte/bloquerutilisateurs" method="POST">
+                <label for="emails">Emails à bloquer (Séparés par des virgules et sans espaces):</label>
+                <br>
+                <input type="text" id="emails" name="emails">
+                <br>
+                <div>
+                    <button>Bloquer</button>
+                </div>
+                <%if(typeof noninsert !== 'undefined' && noninsert.length > 0){%>
+                    <div class="error-message">
+                            <span>Ces mails n'ont pas pu être bloqué car inexistant ou déjà bloqué :</span>
+                            <br>
+                            <% for(i = 0; i < noninsert.length ; i++){ %>
+                                <%=noninsert[i]%>
+                                <br>
+                            <% } %>
+                    </div>
+                <% } %>
+            </form>
+            <br>
+            <a href="/agenda"><button>Retour</button></a>
+        </div> 
+
+        <div class="container2">
+            <h1>Liste des bloqués</h1>
+            <label style="justify-self: center;">La liste des e-mails que vous avez bloqués</label>
+            <ul>
                 <% for(i = 0;i < userData.blocked.length ;i++){%>
-                    <li class="agendaList">
-                        <%= userData.blocked[i] %><br>
-                        <div class="partage-form">
+                        <div style="display: ruby;">
+                            <li style="display: list-item;">
+                            <%= userData.blocked[i] %><br>
                             <form action="/users/compte/debloquerutilisateurs" method="POST">
                                 <input type="hidden" name="userConnectedEmail" value="<%= userData.email %>">
                                 <input type="hidden" name="blockedUserEmail" value="<%=userData.blocked[i]%>">
                                 <button type="submit">Débloquer</button>
                             </form>
+                            </li>
                             <% if (typeof error !== 'undefined' && error) { %>
                                 <div class="error-message">
                                     <%= error %>
@@ -59,11 +87,12 @@
                             <% } %>
                             <br>
                         </div>
-        
-                    </li>
+                    <br>
+                    <br>
                 <% } %>
             </ul>
-            </div>
+        </div>
+    </div>
     </div>
 </body>
 </html>

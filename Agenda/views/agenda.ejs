@@ -13,15 +13,15 @@
                 <h1>Agenda</h1>
             </div>
             <div class="compte">
-                <li><h2><%= userEmailConnected %></h2></li>
+                <li><h2 class="email"><%= userEmailConnected %></h2></li>
                 <li>
                     <form action = "/users/compte" method="GET">
-                        <button type="submit"> Modifier votre compte </button>
+                        <button class="button-header" type="submit"> Modifier votre compte </button>
                     </form>
                 </li>
                 <li>                 
                     <form id="logoutForm" action="/users/logout" method="GET">
-                        <button type="submit" id="logoutBtn">Déconnexion</button>
+                        <button class="button-header" type="submit" id="logoutBtn">Déconnexion</button>
                     </form>
                 </li>
             </div>
@@ -61,7 +61,7 @@
                                 <br>
                                 <div class="buttonaction">
                                     <form action="/rendezvous/<%= agenda.id %>" method="GET">
-                                        <button>Voir</button>
+                                        <button class="ajouter-bouton" >Voir</button>
                                     </form>
                                     <form action="/agenda/<%= agenda.id %>/modifier" method="GET">
                                         <button>Modifier</button>

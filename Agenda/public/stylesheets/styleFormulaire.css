@@ -1,21 +1,28 @@
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom right, rgb(247, 245, 245), #f5f4f4, rgb(255, 250, 250));
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    background: linear-gradient(to bottom right, rgb(221, 221, 221), #f0efef, rgb(235, 234, 234));
+    min-height: 6000px;
 }
 
 .container {
+    place-self: center;
     background-color: white;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+    margin-top: 10%;
+}
+
+.container2 {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10%;
 }
 
 h1 {
@@ -113,13 +120,14 @@ a:hover {
 
 .menu{
     display: flex;
+    list-style: none;
   }
 
 .compte{
     display: ruby;
     position: absolute;
     right: 20px; 
-    padding-top: 0.6%;
+    padding-top: 0.5%;
   }
 
 .agenda{
@@ -130,3 +138,12 @@ a:hover {
     background-color:rgb(60 60 60);
     box-shadow: 14px -8px 0 26px rgb(60 60 60);
 }
+
+.title-header{
+    color: #eeeeee;
+}
+
+.email{
+    color: #eeeeee;
+}
+
