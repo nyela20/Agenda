@@ -11,7 +11,6 @@ Ce projet est un gestionnaire d'agenda simple et efficace, réalisé dans le cad
 Pour configurer le projet, exécutez les commandes suivantes dans votre terminal :
 ```bash
 npm install
-npm install nodemailer crypto
 npm start
 ```
 
