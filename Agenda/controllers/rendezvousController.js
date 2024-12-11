@@ -263,7 +263,7 @@ exports.afficherRendezVous = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
+      ],createurEmail: {$nin : userConnectedData[0].blocked},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case
     });
@@ -419,7 +419,7 @@ exports.afficherRendezVousJour = async (req, res) => {
           dateRendezVous: { $lte: finMois },
           finRecurrence: { $gte: debutMois }
         }
-      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
+      ],createurEmail: {$nin : userConnectedData[0].blocked},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
     });
@@ -588,7 +588,7 @@ exports.afficherRendezVousMois = async (req, res) => {
             $lte: finMois
           }
         }
-      ],createurEmail: {$nin : userConnectedData[0].blocked,$in : mailpartage},
+      ],createurEmail: {$nin : userConnectedData[0].blocked},
       ...(nomFiltre ? { nom: { $regex: "^"+nomFiltre+"$", $options: "i" } } : {}), // i insensible a la case
       ...(emailFiltre ? { createurEmail : { $regex: "^"+emailFiltre+"$", $options: "i" } } : {}) // i insensible a la case    
     
